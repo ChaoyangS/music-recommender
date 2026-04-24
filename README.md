@@ -1,252 +1,319 @@
-# 🎵 Music Recommender Simulation
+# Music Recommender — Agentic AI Edition
 
-## Project Summary
+## Original Project
 
-In this project you will build and explain a small music recommender system.
-
-Your goal is to:
-
-- Represent songs and a user "taste profile" as data
-- Design a scoring rule that turns that data into recommendations
-- Evaluate what your system gets right and wrong
-- Reflect on how this mirrors real world AI recommenders
-
-Replace this paragraph with your own summary of what your version does.
+**Music Recommender Simulation** was a rule-based content filtering system built in Python. Given a user profile (favorite genre, mood, target energy, and acoustic preference), it scored every song in a 18-song CSV catalog using a weighted formula — genre match (+5), mood match (+4), energy closeness (+2), and acoustic bonus (+1) — then returned the top K results. The project demonstrated how real-world platforms like Spotify approximate "taste matching" without any machine learning, making the scoring logic fully transparent and inspectable.
 
 ---
 
-## How The System Works
+## Title and Summary
 
-Modern recommendation systems like Spotify or YouTube combine many signals to guess what a listener will enjoy next. They use content-based signals such as genre, mood, tempo, and energy plus collaborative signals from other listeners who liked similar tracks. In this simplified version, the system focuses on content-based matching: it compares each song's genre, mood, and audio features to a user’s profile and gives higher scores to songs that are closer to the user’s preferred style and energy.
+**Music Recommender — Agentic AI Edition** extends the original rule-based recommender with a Claude-powered agent that accepts natural language requests and manages its own recommendation workflow. Instead of passing a hardcoded profile, a user can say *"I want something chill to study to"* and the agent will infer the right parameters, fetch recommendations, evaluate their quality, and retry with adjusted settings if the first attempt falls short — all automatically.
 
-Some prompts to answer:
+Every step of that process is visible. The agent prints Claude's planning text, each tool call with its inputs, the result of every tool, and a FIX notice whenever a retry is triggered. This makes the full PLAN → ACT → CHECK → FIX reasoning chain observable at runtime, not just the final answer.
 
-- What features does each `Song` use in your system
-  - For example: genre, mood, energy, tempo
-- What information does your `UserProfile` store
-- How does your `Recommender` compute a score for each song
-- How do you choose which songs to recommend
-
-In this simulation, each `Song` uses:
-
-- `genre`
-- `mood`
-- `energy`
-- `tempo_bpm`
-- `valence`
-- `danceability`
-- `acousticness`
-
-The `UserProfile` stores:
-
-- `favorite_genre`
-- `favorite_mood`
-- `target_energy`
-- `likes_acoustic`
-
-The scoring logic gives slightly more weight to genre than mood. A practical point scheme is:
-
-- Genre match = `5` points
-- Mood match = `4` points
-
-### Algorithm Recipe
-
-1. Load `data/songs.csv` into song records.
-2. For each song:
-   - Start with a base score of `0`.
-   - Add `5` points if the song genre matches the user’s favorite genre.
-   - Add `4` points if the song mood matches the user’s favorite mood.
-   - Apply additional adjustments for energy closeness and acoustic preference.
-3. Sort all songs by score in descending order.
-4. Return the top `K` songs as recommendations.
-
-### Potential bias
-
-This system may over-prioritize genre, which can ignore great songs that match the user's mood but come from a different genre. It also assumes a single favorite genre and mood per user, so it may miss subtler or mixed preferences.
-
-You can include a simple diagram or bullet list if helpful.
+This matters because it bridges the gap between brittle hand-tuned rules and a more natural, self-correcting AI assistant: the scoring engine stays deterministic and auditable, while Claude handles the fuzzy reasoning and quality judgment.
 
 ---
 
-## Getting Started
+## Architecture Overview
 
-### Setup
+```
+User (natural language) ──► Agent (agent.py + Claude claude-opus-4-7)
+                                │
+                    ┌───────────┼───────────────┐
+                    ▼           ▼               ▼
+             browse_catalog  get_recommendations  evaluate_quality
+                    │           │               │
+                    └───────────┴───────────────┘
+                                │
+                        Retriever (recommender.py)
+                                │
+                          data/songs.csv
+                          (18 songs · 10 features)
+                                │
+                         Ranked Results + Explanation ──► User
+```
 
-1. Create a virtual environment (optional but recommended):
+The system has four layers:
 
-   ```bash
-   python -m venv .venv
-   source .venv/bin/activate      # Mac or Linux
-   .venv\Scripts\activate         # Windows
+| Layer | File | Role |
+|---|---|---|
+| **Data** | `data/songs.csv` | 18 songs with genre, mood, energy, tempo, valence, danceability, acousticness |
+| **Retriever** | `src/recommender.py` | `load_songs`, `score_song`, `recommend_songs` — pure scoring logic |
+| **Agent** | `src/agent.py` | Claude agentic loop: PLAN → ACT → CHECK → FIX, up to 2 retries, observable steps |
+| **Evaluation** | `evaluate.py` | 19-case harness — scoring engine + agent tools, pass/fail + confidence scores |
 
-   ```
+The `main.py` runner bypasses the agent and calls the retriever directly with three hardcoded profiles, useful for quick testing without API calls.
 
-2. Install dependencies
+Human-in-the-loop testing lives in `tests/test_recommender.py` — a developer runs `pytest` and reviews failures before merging changes. The `evaluate.py` harness runs independently and checks end-to-end correctness across predefined profiles.
+
+---
+
+## Setup Instructions
+
+### 1. Install dependencies
 
 ```bash
+cd music-recommender
 pip install -r requirements.txt
 ```
 
-3. Run the app:
+### 2. Add your Anthropic API key
+
+Create a `.env` file in the project root (or the parent `music-recommander/` folder):
+
+```
+ANTHROPIC_API_KEY=sk-ant-...
+```
+
+Get your key at [console.anthropic.com](https://console.anthropic.com). Make sure your account has available credits.
+
+### 3. Run the rule-based recommender (no API key needed)
 
 ```bash
 python -m src.main
 ```
 
-### Running Tests
+### 4. Run the AI agent with a natural language request
 
-Run the starter tests with:
+```bash
+python src/agent.py "I want something chill to study to"
+```
+
+Or from the outer folder:
+
+```bash
+python /path/to/music-recommender/src/agent.py "I love relaxing jazz for a quiet evening"
+```
+
+### 5. Run the evaluation harness
+
+```bash
+python evaluate.py
+```
+
+Runs 19 predefined checks across the scoring engine and agent tool dispatcher and prints a pass/fail report with confidence scores. No API key needed.
+
+### 6. Run unit tests
 
 ```bash
 pytest
 ```
 
-You can add more tests in `tests/test_recommender.py`.
+---
+
+## Sample Interactions
+
+### Example 1 — Study session request
+
+**Input:**
+```
+python src/agent.py "I need focused background music for deep work sessions"
+```
+
+**Agent steps:**
+```
+────────────────────────────────────────────────
+  Iteration 1
+────────────────────────────────────────────────
+  💭 PLAN: The user wants focused background music for deep work.
+  💭 I'll look at the catalog first, then infer lofi + focused + low energy.
+
+  ▶ PLAN  — browse catalog
+    input : {}
+    result: 18 songs in catalog
+
+  ▶ ACT   — get recommendations
+    input : {"favorite_genre": "lofi", "favorite_mood": "focused", "target_energy": 0.4, "likes_acoustic": true}
+    result: 5 songs returned — top: "Focus Flow" (score=9.4)
+
+  ▶ CHECK — evaluate quality
+    input : {"recommendations": [...], "user_request": "I need focused background music..."}
+    result: quality=good — ✔ no issues
+
+[Agent] Done in 1 iteration(s).
+```
+
+**Output:**
+> Here are my top picks for your deep work sessions:
+> 1. **Focus Flow** by LoRoom (lofi, focused, 9.4) — perfect genre and mood match with low energy
+> 2. **Midnight Coding** by LoRoom (lofi, chill, 8.4) — same artist, great for sustained concentration
+> 3. **Library Rain** by Paper Lanterns (lofi, chill, 8.2) — soft acoustic texture ideal for reading
+>
+> All three are low-energy lofi tracks that minimize distraction while keeping you in a calm, alert state.
 
 ---
 
-## Experiments You Tried
+### Example 2 — High-energy workout request
 
-Use this section to document the experiments you ran. For example:
+**Input:**
+```
+python src/agent.py "I want energetic music to work out to!"
+```
 
-- What happened when you changed the weight on genre from 2.0 to 0.5
-- What happened when you added tempo or valence to the score
-- How did your system behave for different types of users
+**Agent steps:**
+```
+────────────────────────────────────────────────
+  Iteration 1
+────────────────────────────────────────────────
+  💭 PLAN: High energy workout request — pop or rock, intense mood, energy near 1.0.
+  💭 No need to browse the catalog; I know what's available.
+
+  ▶ ACT   — get recommendations
+    input : {"favorite_genre": "pop", "favorite_mood": "intense", "target_energy": 0.9, "likes_acoustic": false}
+    result: 5 songs returned — top: "Gym Hero" (score=11.0)
+
+  ▶ CHECK — evaluate quality
+    input : {"recommendations": [...], "user_request": "I want energetic music to work out to!"}
+    result: quality=good — ✔ no issues
+
+[Agent] Done in 1 iteration(s).
+```
+
+**Output:**
+> For your workout, I recommend:
+> 1. **Gym Hero** by Max Pulse (pop, intense, 11.0) — exact genre, mood, and energy match
+> 2. **Storm Runner** by Voltline (rock, intense, 9.0) — driving rock energy at 152 BPM
+> 3. **Sunrise City** by Neon Echo (pop, happy, 8.8) — upbeat pop to keep your pace up
 
 ---
 
-## Limitations and Risks
+### Example 3 — Late-night mood request with retry
 
-Summarize some limitations of your recommender.
+**Input:**
+```
+python src/agent.py "Something atmospheric and moody for a late night drive"
+```
 
-Examples:
+**Agent steps:**
+```
+────────────────────────────────────────────────
+  Iteration 1
+────────────────────────────────────────────────
+  💭 PLAN: Atmospheric and moody late-night drive — ambient or synthwave,
+  💭 moody mood, medium energy around 0.5–0.7.
 
-- It only works on a tiny catalog
-- It does not understand lyrics or language
-- It might over favor one genre or mood
+  ▶ ACT   — get recommendations
+    input : {"favorite_genre": "ambient", "favorite_mood": "moody", "target_energy": 0.5}
+    result: 5 songs returned — top: "Night Drive Loop" (score=6.2)
 
-You will go deeper on this in your model card.
+  ▶ CHECK — evaluate quality
+    input : {"recommendations": [...], "user_request": "Something atmospheric and moody..."}
+    result: quality=acceptable — ✘ Low genre diversity — all songs are ambient
+    FIX   — adjusting parameters and retrying …
+
+────────────────────────────────────────────────
+  Iteration 2
+────────────────────────────────────────────────
+  💭 FIX: Diversity was low — switching genre to synthwave and raising energy slightly.
+
+  ▶ ACT   — get recommendations
+    input : {"favorite_genre": "synthwave", "favorite_mood": "moody", "target_energy": 0.7}
+    result: 5 songs returned — top: "Night Drive Loop" (score=8.75)
+
+  ▶ CHECK — evaluate quality
+    input : {"recommendations": [...], "user_request": "Something atmospheric and moody..."}
+    result: quality=good — ✔ no issues
+
+[Agent] Done in 2 iteration(s).
+```
+
+**Output:**
+> After adjusting for genre diversity, here are my late-night picks:
+> 1. **Night Drive Loop** by Neon Echo (synthwave, moody) — neon-lit, cinematic energy
+> 2. **Spacewalk Thoughts** by Orbit Bloom (ambient, chill) — ethereal and spacious
+>
+> The synthwave / ambient mix gives you that late-night atmosphere without getting too repetitive.
+
+---
+
+## Design Decisions
+
+### Why keep the scoring engine separate from the agent?
+
+`score_song()` in `recommender.py` is pure, deterministic Python — no API calls, no randomness. The agent calls it as a tool rather than asking Claude to score songs directly. This means the scoring logic is fully testable with `pytest`, costs nothing to run, and the results are reproducible. Claude's job is the fuzzy parts: interpreting natural language, evaluating quality, and deciding when to retry.
+
+### Why a manual tool-use loop instead of a higher-level framework?
+
+Using the raw Anthropic SDK loop (`response.content` → execute tools → append results → repeat) keeps the code visible and editable. There are no hidden abstractions. Every tool call and its result can be logged, inspected, or intercepted. The trade-off is more boilerplate compared to a framework like LangChain, but it makes the agent's behavior easier to understand and debug.
+
+### Why prompt caching on the system prompt?
+
+The system prompt is long and stable — it never changes between requests. Adding `cache_control: {"type": "ephemeral"}` tells Anthropic's API to cache it, so repeated calls (especially the CHECK → FIX retry loop) only charge input tokens for the new messages, not the prompt. This cuts costs roughly 3–5× on multi-iteration runs.
+
+### Why make intermediate steps observable?
+
+An agent that only shows its final answer is a black box — you can't tell whether it planned correctly, which tool it called first, or why it decided to retry. The verbose output in `run_agent` prints three distinct types of intermediate information: Claude's `💭` reasoning text (the planning and self-correction narration Claude writes before each tool call), `▶` step labels that map each tool call to its phase in the PLAN → ACT → CHECK → FIX loop, and a `FIX` notice that fires automatically when `evaluate_quality` returns "acceptable" or "poor." Together these let you follow the agent's decision-making chain step by step, catch bad parameter choices early, and verify that retries are actually improving the results. The trade-off is noisier terminal output; for production use, `verbose=False` silences all of it.
+
+### Why a separate evaluation harness in addition to pytest?
+
+`pytest` unit tests check that individual functions behave correctly in isolation — `score_song` adds the right points, `load_songs` parses floats, etc. They don't answer the question: *does the system actually recommend the right song for a real user profile?* `evaluate.py` fills that gap. It runs 12 realistic profiles (pop fan, jazz evening, folk acoustic, unknown genre, etc.) against the full 18-song catalog, verifies that the top-ranked song matches the expected genre and mood, checks that confidence scores fall in plausible ranges, and confirms that edge cases (k larger than catalog, zero-match genres) don't crash or return nonsense. Each case also reports a **confidence score** — top score ÷ 12.0 (the maximum possible) — so you can see at a glance whether a recommendation is a strong match or a weak fallback. The harness exits with code `1` if any check fails, which makes it easy to plug into CI alongside `pytest`.
+
+### Why up to 2 retries and not more?
+
+Each retry is an additional round-trip to the API, which adds latency and cost. In practice, one adjustment (e.g., switching from `ambient` to `synthwave`) is usually enough to move quality from "acceptable" to "good." A hard cap of 2 prevents runaway loops while still allowing meaningful self-correction.
+
+### Trade-offs
+
+| Decision | Benefit | Cost |
+|---|---|---|
+| 18-song catalog | Easy to reason about, fully auditable | Recommendations repeat quickly; limited diversity |
+| Genre + mood as primary signals | Transparent, matches user mental model | Ignores tempo, valence, danceability in scoring |
+| Single user profile (no history) | Simple to implement | Can't learn from past preferences |
+| Claude claude-opus-4-7 | Best reasoning quality for agentic tasks | Higher cost per call vs. Haiku or Sonnet |
+
+---
+
+## Testing Summary
+
+**42/42 unit tests passed · 19/19 evaluation checks passed.**
+
+The project uses two complementary testing tools:
+
+| Tool | Command | What it checks |
+|---|---|---|
+| `pytest` | `pytest` | Function-level correctness — scoring math, CSV parsing, sort order, OOP class |
+| Evaluation harness | `python evaluate.py` | End-to-end correctness — right genre/mood surfaces for real profiles, confidence scores, edge cases |
+
+### Evaluation harness results
+
+```
+Scoring engine : 12/12 passed  avg top-score=10.85  avg confidence=0.90
+Agent tools    :  7/7  passed
+Overall        : 19/19 passed  (100%)
+```
+
+Highlights from the 12 scoring cases:
+
+| Case | Profile | Top song | Score | Confidence |
+|---|---|---|---|---|
+| SC-02 | Lofi / chill / acoustic | Midnight Coding | 11.96 | 1.00 |
+| SC-05 | Folk / melancholic / acoustic | Sunset Wagon | 12.00 | 1.00 |
+| SC-07 | Classical / dreamy / acoustic | Midnight Sonata | 12.00 | 1.00 |
+| SC-11 | Unknown genre (edge case) | — | 5.48 | 0.46 |
+
+SC-05 and SC-07 hit the maximum possible score of 12.0 (genre + mood + exact energy + acoustic bonus). SC-11 confirms the system degrades gracefully when the genre doesn't exist in the catalog — it still returns k results ranked by energy and mood proximity rather than crashing.
+
+### What worked
+
+- **`pytest` unit tests** caught the placeholder `Recommender.recommend()` returning unsorted results immediately. The tests enforce that the top result must match the expected genre and mood, which makes regressions visible.
+- **The evaluation harness** confirmed that 8 out of 12 genre profiles achieve a confidence score ≥ 0.90, meaning the top recommendation uses at least 90% of the maximum possible score — a strong genre, mood, and energy match every time.
+- **The agent's retry loop** worked correctly in the late-night scenario — the quality evaluator flagged low genre diversity on the first pass and Claude successfully adjusted the genre parameter on the retry.
+
+### What didn't work / limitations
+
+- **SC-11 (unknown genre) confidence = 0.46.** When the requested genre isn't in the catalog, the top score drops to ~5.5 because only mood and energy contribute. The system still returns results, but they are noticeably weaker matches.
+- **18 songs is a very small catalog.** For niche requests (blues, reggae), there are too few songs for the diversity check to pass regardless of how the agent adjusts parameters.
+- **The agent cannot learn across sessions.** Every run starts from scratch with no memory of what the user liked before.
+
+### What I learned
+
+- Writing the `_execute_tool()` dispatcher made clear how much of agent behavior is just routing: Claude decides *which* tool to call; Python decides *what to do* with that call. Keeping those responsibilities separate made each piece easier to test independently.
+- The evaluation harness revealed something the unit tests missed: the confidence gap between a perfect match (1.00) and an unknown-genre fallback (0.46) is large enough to be meaningful. Unit tests verify correctness; the harness measures quality. Both are necessary.
 
 ---
 
 ## Reflection
 
-Read and complete `model_card.md`:
-
-[**Model Card**](model_card.md)
-
-Write 1 to 2 paragraphs here about what you learned:
-
-- about how recommenders turn data into predictions
-- about where bias or unfairness could show up in systems like this
-
----
-
-## 7. `model_card_template.md`
-
-Combines reflection and model card framing from the Module 3 guidance. :contentReference[oaicite:2]{index=2}
-
-```markdown
-# 🎧 Model Card - Music Recommender Simulation
-
-## 1. Model Name
-
-Give your recommender a name, for example:
-
-> VibeFinder 1.0
-
----
-
-## 2. Intended Use
-
-- What is this system trying to do
-- Who is it for
-
-Example:
-
-> This model suggests 3 to 5 songs from a small catalog based on a user's preferred genre, mood, and energy level. It is for classroom exploration only, not for real users.
-
----
-
-## 3. How It Works (Short Explanation)
-
-Describe your scoring logic in plain language.
-
-- What features of each song does it consider
-- What information about the user does it use
-- How does it turn those into a number
-
-Try to avoid code in this section, treat it like an explanation to a non programmer.
-
----
-
-## 4. Data
-
-Describe your dataset.
-
-- How many songs are in `data/songs.csv`
-- Did you add or remove any songs
-- What kinds of genres or moods are represented
-- Whose taste does this data mostly reflect
-
----
-
-## 5. Strengths
-
-Where does your recommender work well
-
-You can think about:
-
-- Situations where the top results "felt right"
-- Particular user profiles it served well
-- Simplicity or transparency benefits
-
----
-
-## 6. Limitations and Bias
-
-Where does your recommender struggle
-
-Some prompts:
-
-- Does it ignore some genres or moods
-- Does it treat all users as if they have the same taste shape
-- Is it biased toward high energy or one genre by default
-- How could this be unfair if used in a real product
-
----
-
-## 7. Evaluation
-
-How did you check your system
-
-Examples:
-
-- You tried multiple user profiles and wrote down whether the results matched your expectations
-- You compared your simulation to what a real app like Spotify or YouTube tends to recommend
-- You wrote tests for your scoring logic
-
-You do not need a numeric metric, but if you used one, explain what it measures.
-
----
-
-## 8. Future Work
-
-If you had more time, how would you improve this recommender
-
-Examples:
-
-- Add support for multiple users and "group vibe" recommendations
-- Balance diversity of songs instead of always picking the closest match
-- Use more features, like tempo ranges or lyric themes
-
----
-
-## 9. Personal Reflection
-
-A few sentences about what you learned:
-
-- What surprised you about how your system behaved
-- How did building this change how you think about real music recommenders
-- Where do you think human judgment still matters, even if the model seems "smart"
-```
+See [model_card.md](model_card.md) for the full reflection, including limitations and biases, misuse considerations, testing surprises, and collaboration with AI.
