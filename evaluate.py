@@ -156,7 +156,7 @@ def run_scoring_cases(songs: list[dict]) -> list[CaseResult]:
             "name": "Score range validity — no negative scores",
             "prefs": {"favorite_genre": "pop", "favorite_mood": "happy",
                       "target_energy": 0.80},
-            "k": 18,
+            "k": len(songs),
             "expect_top_genre": None,
             "expect_top_mood":  None,
             "expect_min_score": 0.0,
@@ -261,10 +261,11 @@ def run_agent_tool_cases(songs: list[dict]) -> list[CaseResult]:
     cases_raw = []
 
     # AT-01: browse_catalog
+    expected_total = len(songs)
     r = CaseResult(id="AT-01", name="browse_catalog — returns full catalog")
     result = json.loads(_execute_tool("browse_catalog", {}, songs))
-    r.checks.append(check("total = 18",       result.get("total") == 18,       f"got {result.get('total')}"))
-    r.checks.append(check("songs list = 18",  len(result.get("songs", [])) == 18))
+    r.checks.append(check(f"total = {expected_total}", result.get("total") == expected_total, f"got {result.get('total')}"))
+    r.checks.append(check(f"songs list = {expected_total}", len(result.get("songs", [])) == expected_total))
     r.checks.append(check("has title field",  "title" in result["songs"][0]))
     r.checks.append(check("has energy field", "energy" in result["songs"][0]))
     cases_raw.append(r)

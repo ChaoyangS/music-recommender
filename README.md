@@ -35,13 +35,14 @@ User (natural language) ──► Agent (agent.py + Claude claude-opus-4-7)
                          Ranked Results + Explanation ──► User
 ```
 
-The system has four layers:
+The system has five layers:
 
 | Layer | File | Role |
 |---|---|---|
 | **Data** | `data/songs.csv` | 18 songs with genre, mood, energy, tempo, valence, danceability, acousticness |
 | **Retriever** | `src/recommender.py` | `load_songs`, `score_song`, `recommend_songs` — pure scoring logic |
 | **Agent** | `src/agent.py` | Claude agentic loop: PLAN → ACT → CHECK → FIX, up to 2 retries, observable steps |
+| **Frontend** | `app.py` | Streamlit web UI — AI Agent tab (live steps) + Quick Recommend tab (no API key) |
 | **Evaluation** | `evaluate.py` | 19-case harness — scoring engine + agent tools, pass/fail + confidence scores |
 
 The `main.py` runner bypasses the agent and calls the retriever directly with three hardcoded profiles, useful for quick testing without API calls.
@@ -75,19 +76,23 @@ Get your key at [console.anthropic.com](https://console.anthropic.com). Make sur
 python -m src.main
 ```
 
-### 4. Run the AI agent with a natural language request
+### 4. Launch the web UI
+
+```bash
+streamlit run app.py
+```
+
+Opens at `http://localhost:8501`. Two tabs:
+- **🤖 AI Agent** — type a natural language request; watch the PLAN → ACT → CHECK → FIX steps live (requires API key)
+- **🎚️ Quick Recommend** — pick genre, mood, energy via dropdowns and sliders; instant results, no API key needed
+
+### 5. Run the AI agent from the terminal
 
 ```bash
 python src/agent.py "I want something chill to study to"
 ```
 
-Or from the outer folder:
-
-```bash
-python /path/to/music-recommender/src/agent.py "I love relaxing jazz for a quiet evening"
-```
-
-### 5. Run the evaluation harness
+### 6. Run the evaluation harness
 
 ```bash
 python evaluate.py
@@ -95,7 +100,7 @@ python evaluate.py
 
 Runs 19 predefined checks across the scoring engine and agent tool dispatcher and prints a pass/fail report with confidence scores. No API key needed.
 
-### 6. Run unit tests
+### 7. Run unit tests
 
 ```bash
 pytest

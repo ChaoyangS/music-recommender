@@ -17,3 +17,65 @@ id,title,artist,genre,mood,energy,tempo_bpm,valence,danceability,acousticness
 16,Neon Pulse,Digital Drift,electronic,playful,0.81,128,0.78,0.85,0.18
 17,Prairie Moon,Amber Fields,country,peaceful,0.39,96,0.60,0.35,0.76
 18,Desert Mirage,Sahara Wave,world,dreamlike,0.48,104,0.67,0.50,0.65
+19,Golden Hour,Citrus Glow,pop,happy,0.78,115,0.87,0.83,0.12
+20,Heartbeat City,Neon Echo,pop,upbeat,0.85,125,0.82,0.87,0.08
+21,Candy Skies,Sugar Rush,pop,playful,0.72,112,0.90,0.78,0.15
+22,Rainy Boulevard,Citrus Glow,pop,melancholic,0.55,95,0.42,0.60,0.28
+23,Dusty Pages,Paper Lanterns,lofi,relaxed,0.32,75,0.58,0.52,0.88
+24,Neon Rain Study,LoRoom,lofi,focused,0.38,82,0.54,0.58,0.75
+25,Sleepy Afternoon,Mossy Stone,lofi,dreamy,0.28,68,0.62,0.45,0.92
+26,Cafe Corner,Slow Stereo,lofi,chill,0.44,78,0.60,0.63,0.82
+27,Iron Wings,Voltline,rock,energetic,0.88,148,0.52,0.71,0.07
+28,Ember Road,Copper Strike,rock,melancholic,0.65,118,0.38,0.58,0.22
+29,Shattered Glass,Iron Crest,rock,intense,0.93,158,0.35,0.68,0.05
+30,Coast Highway,Wavebreak,rock,upbeat,0.79,138,0.68,0.74,0.14
+31,Frozen Lake,Orbit Bloom,ambient,peaceful,0.18,55,0.70,0.25,0.96
+32,Cloud Atlas,Drift Signal,ambient,dreamy,0.22,58,0.68,0.30,0.94
+33,Stillwater,Echo Plains,ambient,relaxed,0.25,62,0.72,0.32,0.90
+34,Northern Lights,Polar Hum,ambient,moody,0.32,65,0.45,0.28,0.88
+35,Velvet Underground,Slow Stereo,jazz,soulful,0.45,92,0.68,0.58,0.84
+36,Smoke and Keys,Blue Quarter,jazz,moody,0.42,88,0.52,0.50,0.82
+37,Late Night Jam,Delta Soul,jazz,relaxed,0.50,96,0.74,0.62,0.78
+38,Brass Morning,Blue Quarter,jazz,upbeat,0.65,108,0.80,0.70,0.68
+39,Neon Highway,Digital Drift,synthwave,energetic,0.85,120,0.65,0.82,0.10
+40,Retrowave City,Chromawave,synthwave,moody,0.70,108,0.48,0.75,0.15
+41,Laser Grid,Neon Echo,synthwave,intense,0.88,130,0.55,0.80,0.08
+42,Synth Dreams,Chromawave,synthwave,dreamy,0.58,100,0.62,0.68,0.20
+43,Paper Boats,Indigo Parade,indie pop,melancholic,0.62,110,0.55,0.72,0.42
+44,Wildflower Summer,Soft Palette,indie pop,happy,0.70,118,0.85,0.76,0.38
+45,Telescope Nights,Soft Palette,indie pop,dreamy,0.55,102,0.68,0.64,0.48
+46,Moonlit Waltz,Velvet Strings,classical,peaceful,0.25,72,0.78,0.18,0.97
+47,Tempest Overture,Velvet Strings,classical,intense,0.82,140,0.38,0.35,0.93
+48,Spring Lullaby,Chamber Echo,classical,dreamy,0.28,68,0.82,0.22,0.96
+49,River Song,Maple Road,folk,peaceful,0.38,88,0.72,0.45,0.88
+50,Wildwood Trail,Amber Fields,folk,upbeat,0.55,104,0.75,0.58,0.80
+51,Campfire Tales,Mossy Stone,folk,melancholic,0.42,92,0.48,0.40,0.86
+52,Sunrise Dub,Bamboo Roots,reggae,peaceful,0.55,80,0.78,0.62,0.52
+53,Ocean Vibes,Coral Tide,reggae,happy,0.68,90,0.82,0.70,0.44
+54,Roots Revival,Coral Tide,reggae,soulful,0.58,84,0.68,0.60,0.56
+55,Midnight Train,Delta Soul,blues,melancholic,0.48,78,0.38,0.42,0.75
+56,Crossroads Call,Dusty Six,blues,soulful,0.55,84,0.48,0.50,0.72
+57,Rainy Day Blues,Dusty Six,blues,moody,0.42,76,0.35,0.38,0.80
+58,Black Horizon,Iron Crest,metal,intense,0.96,175,0.18,0.52,0.05
+59,Void Walker,Abyssal Rift,metal,moody,0.85,155,0.22,0.48,0.08
+60,Steel Crown,Abyssal Rift,metal,energetic,0.92,168,0.25,0.58,0.06
+61,Bass Drop City,Digital Drift,electronic,energetic,0.88,138,0.72,0.90,0.05
+62,Glitch Garden,Pixelwave,electronic,playful,0.75,124,0.80,0.85,0.12
+63,Deep Space Signal,Pixelwave,electronic,moody,0.65,118,0.42,0.78,0.18
+64,Dusty Road Home,Amber Fields,country,melancholic,0.48,96,0.55,0.42,0.82
+65,Barn Dance Fever,Copper Strike,country,upbeat,0.72,116,0.80,0.70,0.65
+66,Porch Swing Evening,Maple Road,country,peaceful,0.35,88,0.68,0.38,0.85
+67,Saharan Night,Sahara Wave,world,dreamy,0.42,98,0.72,0.55,0.60
+68,Eastern Wind,Bamboo Roots,world,peaceful,0.38,92,0.75,0.45,0.68
+69,Velvet Haze,Soft Palette,indie pop,dreamlike,0.52,98,0.72,0.65,0.45
+70,Moongate,Drift Signal,ambient,dreamlike,0.16,56,0.75,0.28,0.95
+71,Neon Drift,Chromawave,synthwave,dreamlike,0.62,102,0.58,0.70,0.18
+72,Deep Focus,Echo Plains,ambient,focused,0.24,60,0.58,0.30,0.92
+73,Study Session,Blue Quarter,jazz,focused,0.40,84,0.62,0.52,0.55
+74,Terminal Flow,Digital Drift,electronic,focused,0.55,110,0.50,0.72,0.20
+75,Bossa Twist,Blue Quarter,jazz,playful,0.62,112,0.85,0.72,0.72
+76,Pixel Jump,Indigo Parade,indie pop,playful,0.68,118,0.88,0.82,0.42
+77,Tibetan Dawn,Sahara Wave,world,peaceful,0.35,88,0.78,0.42,0.72
+78,Jungle Pulse,Bamboo Roots,world,upbeat,0.65,102,0.76,0.68,0.55
+79,Candlelight,Chamber Echo,classical,peaceful,0.14,52,0.72,0.15,0.97
+80,Whisper Room,Paper Lanterns,lofi,dreamy,0.16,58,0.65,0.35,0.90
