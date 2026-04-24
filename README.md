@@ -8,7 +8,7 @@
 
 ## Title and Summary
 
-**Music Recommender — Agentic AI Edition** extends the original rule-based recommender with a Claude-powered agent that accepts natural language requests and manages its own recommendation workflow. Instead of passing a hardcoded profile, a user can say *"I want something chill to study to"* and the agent will infer the right parameters, fetch recommendations, evaluate their quality, and retry with adjusted settings if the first attempt falls short — all automatically.
+**Music Recommender — Agentic AI Edition** extends the original rule-based recommender with a Claude-powered agent that accepts natural language requests and manages its own recommendation workflow. Instead of passing a hardcoded profile, a user can say _"I want something chill to study to"_ and the agent will infer the right parameters, fetch recommendations, evaluate their quality, and retry with adjusted settings if the first attempt falls short — all automatically.
 
 Every step of that process is visible. The agent prints Claude's planning text, each tool call with its inputs, the result of every tool, and a FIX notice whenever a retry is triggered. This makes the full PLAN → ACT → CHECK → FIX reasoning chain observable at runtime, not just the final answer.
 
@@ -37,13 +37,13 @@ User (natural language) ──► Agent (agent.py + Claude claude-opus-4-7)
 
 The system has five layers:
 
-| Layer | File | Role |
-|---|---|---|
-| **Data** | `data/songs.csv` | 18 songs with genre, mood, energy, tempo, valence, danceability, acousticness |
-| **Retriever** | `src/recommender.py` | `load_songs`, `score_song`, `recommend_songs` — pure scoring logic |
-| **Agent** | `src/agent.py` | Claude agentic loop: PLAN → ACT → CHECK → FIX, up to 2 retries, observable steps |
-| **Frontend** | `app.py` | Streamlit web UI — AI Agent tab (live steps) + Quick Recommend tab (no API key) |
-| **Evaluation** | `evaluate.py` | 19-case harness — scoring engine + agent tools, pass/fail + confidence scores |
+| Layer          | File                 | Role                                                                             |
+| -------------- | -------------------- | -------------------------------------------------------------------------------- |
+| **Data**       | `data/songs.csv`     | 18 songs with genre, mood, energy, tempo, valence, danceability, acousticness    |
+| **Retriever**  | `src/recommender.py` | `load_songs`, `score_song`, `recommend_songs` — pure scoring logic               |
+| **Agent**      | `src/agent.py`       | Claude agentic loop: PLAN → ACT → CHECK → FIX, up to 2 retries, observable steps |
+| **Frontend**   | `app.py`             | Streamlit web UI — AI Agent tab (live steps) + Quick Recommend tab (no API key)  |
+| **Evaluation** | `evaluate.py`        | 19-case harness — scoring engine + agent tools, pass/fail + confidence scores    |
 
 The `main.py` runner bypasses the agent and calls the retriever directly with three hardcoded profiles, useful for quick testing without API calls.
 
@@ -83,6 +83,7 @@ streamlit run app.py
 ```
 
 Opens at `http://localhost:8501`. Two tabs:
+
 - **🤖 AI Agent** — type a natural language request; watch the PLAN → ACT → CHECK → FIX steps live (requires API key)
 - **🎚️ Quick Recommend** — pick genre, mood, energy via dropdowns and sliders; instant results, no API key needed
 
@@ -113,11 +114,13 @@ pytest
 ### Example 1 — Study session request
 
 **Input:**
+
 ```
 python src/agent.py "I need focused background music for deep work sessions"
 ```
 
 **Agent steps:**
+
 ```
 ────────────────────────────────────────────────
   Iteration 1
@@ -141,7 +144,9 @@ python src/agent.py "I need focused background music for deep work sessions"
 ```
 
 **Output:**
+
 > Here are my top picks for your deep work sessions:
+>
 > 1. **Focus Flow** by LoRoom (lofi, focused, 9.4) — perfect genre and mood match with low energy
 > 2. **Midnight Coding** by LoRoom (lofi, chill, 8.4) — same artist, great for sustained concentration
 > 3. **Library Rain** by Paper Lanterns (lofi, chill, 8.2) — soft acoustic texture ideal for reading
@@ -153,11 +158,13 @@ python src/agent.py "I need focused background music for deep work sessions"
 ### Example 2 — High-energy workout request
 
 **Input:**
+
 ```
 python src/agent.py "I want energetic music to work out to!"
 ```
 
 **Agent steps:**
+
 ```
 ────────────────────────────────────────────────
   Iteration 1
@@ -177,7 +184,9 @@ python src/agent.py "I want energetic music to work out to!"
 ```
 
 **Output:**
+
 > For your workout, I recommend:
+>
 > 1. **Gym Hero** by Max Pulse (pop, intense, 11.0) — exact genre, mood, and energy match
 > 2. **Storm Runner** by Voltline (rock, intense, 9.0) — driving rock energy at 152 BPM
 > 3. **Sunrise City** by Neon Echo (pop, happy, 8.8) — upbeat pop to keep your pace up
@@ -187,11 +196,13 @@ python src/agent.py "I want energetic music to work out to!"
 ### Example 3 — Late-night mood request with retry
 
 **Input:**
+
 ```
 python src/agent.py "Something atmospheric and moody for a late night drive"
 ```
 
 **Agent steps:**
+
 ```
 ────────────────────────────────────────────────
   Iteration 1
@@ -225,7 +236,9 @@ python src/agent.py "Something atmospheric and moody for a late night drive"
 ```
 
 **Output:**
+
 > After adjusting for genre diversity, here are my late-night picks:
+>
 > 1. **Night Drive Loop** by Neon Echo (synthwave, moody) — neon-lit, cinematic energy
 > 2. **Spacewalk Thoughts** by Orbit Bloom (ambient, chill) — ethereal and spacious
 >
@@ -253,7 +266,7 @@ An agent that only shows its final answer is a black box — you can't tell whet
 
 ### Why a separate evaluation harness in addition to pytest?
 
-`pytest` unit tests check that individual functions behave correctly in isolation — `score_song` adds the right points, `load_songs` parses floats, etc. They don't answer the question: *does the system actually recommend the right song for a real user profile?* `evaluate.py` fills that gap. It runs 12 realistic profiles (pop fan, jazz evening, folk acoustic, unknown genre, etc.) against the full 18-song catalog, verifies that the top-ranked song matches the expected genre and mood, checks that confidence scores fall in plausible ranges, and confirms that edge cases (k larger than catalog, zero-match genres) don't crash or return nonsense. Each case also reports a **confidence score** — top score ÷ 12.0 (the maximum possible) — so you can see at a glance whether a recommendation is a strong match or a weak fallback. The harness exits with code `1` if any check fails, which makes it easy to plug into CI alongside `pytest`.
+`pytest` unit tests check that individual functions behave correctly in isolation — `score_song` adds the right points, `load_songs` parses floats, etc. They don't answer the question: _does the system actually recommend the right song for a real user profile?_ `evaluate.py` fills that gap. It runs 12 realistic profiles (pop fan, jazz evening, folk acoustic, unknown genre, etc.) against the full 18-song catalog, verifies that the top-ranked song matches the expected genre and mood, checks that confidence scores fall in plausible ranges, and confirms that edge cases (k larger than catalog, zero-match genres) don't crash or return nonsense. Each case also reports a **confidence score** — top score ÷ 12.0 (the maximum possible) — so you can see at a glance whether a recommendation is a strong match or a weak fallback. The harness exits with code `1` if any check fails, which makes it easy to plug into CI alongside `pytest`.
 
 ### Why up to 2 retries and not more?
 
@@ -261,12 +274,12 @@ Each retry is an additional round-trip to the API, which adds latency and cost. 
 
 ### Trade-offs
 
-| Decision | Benefit | Cost |
-|---|---|---|
-| 18-song catalog | Easy to reason about, fully auditable | Recommendations repeat quickly; limited diversity |
-| Genre + mood as primary signals | Transparent, matches user mental model | Ignores tempo, valence, danceability in scoring |
-| Single user profile (no history) | Simple to implement | Can't learn from past preferences |
-| Claude claude-opus-4-7 | Best reasoning quality for agentic tasks | Higher cost per call vs. Haiku or Sonnet |
+| Decision                         | Benefit                                  | Cost                                              |
+| -------------------------------- | ---------------------------------------- | ------------------------------------------------- |
+| 18-song catalog                  | Easy to reason about, fully auditable    | Recommendations repeat quickly; limited diversity |
+| Genre + mood as primary signals  | Transparent, matches user mental model   | Ignores tempo, valence, danceability in scoring   |
+| Single user profile (no history) | Simple to implement                      | Can't learn from past preferences                 |
+| Claude claude-opus-4-7           | Best reasoning quality for agentic tasks | Higher cost per call vs. Haiku or Sonnet          |
 
 ---
 
@@ -276,9 +289,9 @@ Each retry is an additional round-trip to the API, which adds latency and cost. 
 
 The project uses two complementary testing tools:
 
-| Tool | Command | What it checks |
-|---|---|---|
-| `pytest` | `pytest` | Function-level correctness — scoring math, CSV parsing, sort order, OOP class |
+| Tool               | Command              | What it checks                                                                                      |
+| ------------------ | -------------------- | --------------------------------------------------------------------------------------------------- |
+| `pytest`           | `pytest`             | Function-level correctness — scoring math, CSV parsing, sort order, OOP class                       |
 | Evaluation harness | `python evaluate.py` | End-to-end correctness — right genre/mood surfaces for real profiles, confidence scores, edge cases |
 
 ### Evaluation harness results
@@ -291,12 +304,12 @@ Overall        : 19/19 passed  (100%)
 
 Highlights from the 12 scoring cases:
 
-| Case | Profile | Top song | Score | Confidence |
-|---|---|---|---|---|
-| SC-02 | Lofi / chill / acoustic | Midnight Coding | 11.96 | 1.00 |
-| SC-05 | Folk / melancholic / acoustic | Sunset Wagon | 12.00 | 1.00 |
-| SC-07 | Classical / dreamy / acoustic | Midnight Sonata | 12.00 | 1.00 |
-| SC-11 | Unknown genre (edge case) | — | 5.48 | 0.46 |
+| Case  | Profile                       | Top song        | Score | Confidence |
+| ----- | ----------------------------- | --------------- | ----- | ---------- |
+| SC-02 | Lofi / chill / acoustic       | Midnight Coding | 11.96 | 1.00       |
+| SC-05 | Folk / melancholic / acoustic | Sunset Wagon    | 12.00 | 1.00       |
+| SC-07 | Classical / dreamy / acoustic | Midnight Sonata | 12.00 | 1.00       |
+| SC-11 | Unknown genre (edge case)     | —               | 5.48  | 0.46       |
 
 SC-05 and SC-07 hit the maximum possible score of 12.0 (genre + mood + exact energy + acoustic bonus). SC-11 confirms the system degrades gracefully when the genre doesn't exist in the catalog — it still returns k results ranked by energy and mood proximity rather than crashing.
 
@@ -314,7 +327,7 @@ SC-05 and SC-07 hit the maximum possible score of 12.0 (genre + mood + exact ene
 
 ### What I learned
 
-- Writing the `_execute_tool()` dispatcher made clear how much of agent behavior is just routing: Claude decides *which* tool to call; Python decides *what to do* with that call. Keeping those responsibilities separate made each piece easier to test independently.
+- Writing the `_execute_tool()` dispatcher made clear how much of agent behavior is just routing: Claude decides _which_ tool to call; Python decides _what to do_ with that call. Keeping those responsibilities separate made each piece easier to test independently.
 - The evaluation harness revealed something the unit tests missed: the confidence gap between a perfect match (1.00) and an unknown-genre fallback (0.46) is large enough to be meaningful. Unit tests verify correctness; the harness measures quality. Both are necessary.
 
 ---
@@ -322,3 +335,7 @@ SC-05 and SC-07 hit the maximum possible score of 12.0 (genre + mood + exact ene
 ## Reflection
 
 See [model_card.md](model_card.md) for the full reflection, including limitations and biases, misuse considerations, testing surprises, and collaboration with AI.
+
+### Demo Loom Link
+
+https://www.loom.com/share/9d94761f610546bbbb73060234435501

@@ -1,4 +1,5 @@
 # Video Walkthrough Script — Music Recommender Agentic AI Edition
+
 **Target length:** 5–7 minutes
 
 ---
@@ -12,7 +13,7 @@
 >
 > The project started as a simple rule-based recommender: you give it a genre, a mood,
 > and a target energy level, and it scores every song in a catalog and returns the best
-> matches. That part required no AI at all — just math.
+> matches. That part required no AI at all — just rule based math.
 >
 > Then I extended it with an agentic workflow: instead of passing a structured profile,
 > you can say something like 'I need something chill to study to' in plain English,
@@ -30,7 +31,7 @@
 
 > "Here's how the pieces fit together.
 >
-> At the bottom is the data layer — a CSV of 18 songs, each with genre, mood, energy,
+> At the bottom is the data layer — a CSV of 81 songs, each with genre, mood, energy,
 > acousticness, and a few other features.
 >
 > Above that is the retriever: pure Python functions in `recommender.py` that load
@@ -53,6 +54,7 @@
 **Screen:** terminal, project root
 
 **Type and run:**
+
 ```
 python src/agent.py "I need focused background music for deep work sessions"
 ```
@@ -85,6 +87,7 @@ python src/agent.py "I need focused background music for deep work sessions"
 **Screen:** same terminal
 
 **Type and run:**
+
 ```
 python src/agent.py "I want energetic music to work out to!"
 ```
@@ -110,6 +113,7 @@ python src/agent.py "I want energetic music to work out to!"
 **Screen:** same terminal
 
 **Type and run:**
+
 ```
 python src/agent.py "Something atmospheric and moody for a late night drive"
 ```
@@ -141,6 +145,7 @@ python src/agent.py "Something atmospheric and moody for a late night drive"
 **Screen:** terminal
 
 **Type and run:**
+
 ```
 python evaluate.py
 ```
