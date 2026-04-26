@@ -60,15 +60,25 @@ cd music-recommender
 pip install -r requirements.txt
 ```
 
-### 2. Add your Anthropic API key
+### 2. Set up environment variables
 
 Create a `.env` file in the project root (or the parent `music-recommander/` folder):
 
 ```
 ANTHROPIC_API_KEY=sk-ant-...
+MONGODB_URI=mongodb://localhost:27017
 ```
 
-Get your key at [console.anthropic.com](https://console.anthropic.com). Make sure your account has available credits.
+- **`ANTHROPIC_API_KEY`** — required for the AI Agent tab. Get your key at [console.anthropic.com](https://console.anthropic.com).
+- **`MONGODB_URI`** — MongoDB connection string. Defaults to `mongodb://localhost:27017` if omitted. Use a [MongoDB Atlas](https://www.mongodb.com/atlas) URI for a hosted database (e.g. `mongodb+srv://user:pass@cluster.mongodb.net`).
+
+The app creates a `music_recommender` database with three collections automatically on first run:
+
+| Collection | Contents |
+|---|---|
+| `users` | username, hashed password, created_at |
+| `sessions` | session token, user_id, expiry (TTL-indexed, auto-cleaned after 24 h) |
+| `music_profiles` | favorite genre/mood, target energy, acoustic preference |
 
 ### 3. Run the rule-based recommender (no API key needed)
 

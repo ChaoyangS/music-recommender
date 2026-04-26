@@ -3,3 +3,6 @@ python-dotenv
 pandas
 pytest
 streamlit
+pymongo
+bcrypt
+requests

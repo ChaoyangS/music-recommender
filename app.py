@@ -1,7 +1,7 @@
 """
 Streamlit web frontend for the Music Recommender system.
 
-Two tabs:
+Two modes (shown after login):
   🤖 AI Agent      — natural language request → PLAN→ACT→CHECK→FIX loop with live steps
   🎚️ Quick Recommend — structured form → instant rule-based results, no API key needed
 
@@ -25,11 +25,25 @@ load_dotenv(dotenv_path=ROOT.parent / ".env")
 
 from src.recommender import load_songs, recommend_songs
 from src.agent import _execute_tool, TOOLS, SYSTEM_PROMPT
+from src.auth import (
+    authenticate_user,
+    create_user,
+    create_session,
+    get_user_from_session,
+    delete_session,
+    save_music_profile,
+    get_music_profile,
+    build_google_auth_url,
+    exchange_code_for_user_info,
+    store_oauth_state,
+    verify_and_consume_oauth_state,
+    find_or_create_google_user,
+)
 
 # ── Constants ─────────────────────────────────────────────────────────────────
 
 SONGS_PATH = str(ROOT / "data" / "songs.csv")
-MAX_SCORE  = 12.0   # genre(5) + mood(4) + energy(2) + acoustic(1)
+MAX_SCORE  = 12.0
 
 STEP_LABELS = {
     "browse_catalog":      "PLAN  — browse catalog",
@@ -56,9 +70,156 @@ songs  = get_songs()
 genres = sorted({s["genre"] for s in songs})
 moods  = sorted({s["mood"]  for s in songs})
 
+# ── Session state init ────────────────────────────────────────────────────────
+
+if "session_token" not in st.session_state:
+    st.session_state.session_token = None
+if "current_user" not in st.session_state:
+    st.session_state.current_user = None
+
+# Validate existing session on each rerun
+if st.session_state.session_token:
+    try:
+        user = get_user_from_session(st.session_state.session_token)
+        if user:
+            st.session_state.current_user = user
+        else:
+            st.session_state.session_token = None
+            st.session_state.current_user = None
+    except Exception:
+        st.session_state.session_token = None
+        st.session_state.current_user = None
+
+# ── Google OAuth callback ─────────────────────────────────────────────────────
+# Handle the redirect from Google before rendering any UI.
+
+_params = st.experimental_get_query_params()
+if "code" in _params and not st.session_state.current_user:
+    _code = _params["code"][0]
+    # Guard: only process each code once — st.experimental_set_query_params() may
+    # not clear the URL before the next rerun in Streamlit 1.22, so the same code
+    # can appear repeatedly in query params.
+    if st.session_state.get("_oauth_handled_code") != _code:
+        st.session_state["_oauth_handled_code"] = _code
+        _state        = _params.get("state", [""])[0]
+        _redirect_uri = os.getenv("GOOGLE_REDIRECT_URI", "http://localhost:8501")
+        try:
+            if verify_and_consume_oauth_state(_state):
+                _guser = exchange_code_for_user_info(_code, _redirect_uri)
+                _user  = find_or_create_google_user(
+                    google_id=_guser["sub"],
+                    email=_guser.get("email", ""),
+                    name=_guser.get("name", _guser.get("email", "user").split("@")[0]),
+                )
+                st.session_state.session_token = create_session(_user["_id"])
+                st.session_state.current_user  = _user
+            else:
+                st.session_state["_oauth_error"] = "Google sign-in failed — please try again."
+        except Exception as _e:
+            st.session_state["_oauth_error"] = f"Google sign-in failed: {_e}"
+        st.session_state.pop("google_auth_url", None)
+        st.experimental_set_query_params()
+        st.experimental_rerun()
+
+# ── Auth page (shown when not logged in) ──────────────────────────────────────
+
+if not st.session_state.current_user:
+    st.title("🎵 Music Recommender")
+
+    col_center = st.columns([1, 2, 1])[1]
+    with col_center:
+        st.markdown("### Welcome — please sign in or create an account")
+        tab_login, tab_signup = st.tabs(["Log In", "Sign Up"])
+
+        with tab_login:
+            login_username = st.text_input("Username", key="login_username")
+            login_password = st.text_input("Password", type="password", key="login_password")
+
+            if st.button("Log In", type="primary", key="btn_login"):
+                if not login_username or not login_password:
+                    st.error("Please enter both username and password.")
+                else:
+                    try:
+                        user = authenticate_user(login_username, login_password)
+                        if user:
+                            token = create_session(user["_id"])
+                            st.session_state.session_token = token
+                            st.session_state.current_user = user
+                            st.experimental_rerun()
+                        else:
+                            st.error("Invalid username or password.")
+                    except Exception as e:
+                        st.error(f"Could not connect to the database. Check MONGODB_URI.\n\n{e}")
+
+        with tab_signup:
+            signup_username = st.text_input("Username", key="signup_username")
+            signup_password = st.text_input("Password", type="password", key="signup_password")
+            signup_confirm  = st.text_input("Confirm password", type="password", key="signup_confirm")
+
+            if st.button("Create Account", type="primary", key="btn_signup"):
+                if not signup_username or not signup_password:
+                    st.error("Please enter a username and password.")
+                elif signup_password != signup_confirm:
+                    st.error("Passwords do not match.")
+                elif len(signup_password) < 6:
+                    st.error("Password must be at least 6 characters.")
+                else:
+                    try:
+                        user = create_user(signup_username, signup_password)
+                        if user:
+                            token = create_session(user["_id"])
+                            st.session_state.session_token = token
+                            st.session_state.current_user = user
+                            st.experimental_rerun()
+                        else:
+                            st.error("Username already taken. Please choose another.")
+                    except Exception as e:
+                        st.error(f"Could not connect to the database. Check MONGODB_URI.\n\n{e}")
+
+        # ── Google sign-in (shown only when credentials are configured) ────────
+        if os.getenv("GOOGLE_CLIENT_ID") and os.getenv("GOOGLE_CLIENT_SECRET"):
+            st.divider()
+            _redirect_uri = os.getenv("GOOGLE_REDIRECT_URI", "http://localhost:8501")
+            if "google_auth_url" not in st.session_state:
+                try:
+                    _auth_url, _state = build_google_auth_url(_redirect_uri)
+                    store_oauth_state(_state)
+                    st.session_state.google_auth_url = _auth_url
+                except Exception:
+                    pass
+            if "google_auth_url" in st.session_state:
+                st.markdown(
+                    f'<div style="text-align:center">'
+                    f'<a href="{st.session_state.google_auth_url}" target="_self" style="text-decoration:none">'
+                    f'<button style="background:#fff;color:#444;border:1px solid #dadce0;'
+                    f'border-radius:4px;padding:9px 16px;cursor:pointer;font-size:14px;width:100%">'
+                    f'<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" '
+                    f'style="height:18px;vertical-align:middle;margin-right:8px">'
+                    f'Sign in with Google</button></a></div>',
+                    unsafe_allow_html=True,
+                )
+
+        if st.session_state.get("_oauth_error"):
+            st.error(st.session_state.pop("_oauth_error"))
+
+    st.stop()
+
+# ── Logged-in state ───────────────────────────────────────────────────────────
+
+current_user = st.session_state.current_user
+
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 
 with st.sidebar:
+    st.markdown(f"**👤 {current_user['username']}**")
+    if st.button("Log Out", key="btn_logout"):
+        delete_session(st.session_state.session_token)
+        st.session_state.session_token = None
+        st.session_state.current_user = None
+        st.session_state.pop("google_auth_url", None)
+        st.experimental_rerun()
+
+    st.divider()
     st.header("About")
     st.markdown("""
     **Two modes:**
@@ -89,7 +250,6 @@ st.caption("Rule-based scoring engine · Claude agentic workflow · PLAN → ACT
 # ── Shared renderer ───────────────────────────────────────────────────────────
 
 def render_results(recs: list[dict]) -> None:
-    """Render a list of recommendation dicts as scored song cards."""
     if not recs:
         st.info("No recommendations returned.")
         return
@@ -156,6 +316,7 @@ with tab_agent:
 
             final_text = ""
             final_recs: list[dict] = []
+            last_inferred_profile: dict | None = None
 
             banner = st.empty()
             banner.info("⏳ Agent running…")
@@ -214,6 +375,11 @@ with tab_agent:
                             result     = json.loads(result_str)
                             recs       = result["recommendations"]
                         final_recs = recs
+                        last_inferred_profile = {
+                            k: block.input[k]
+                            for k in ("favorite_genre", "favorite_mood", "target_energy", "likes_acoustic")
+                            if k in block.input
+                        }
                         top = recs[0] if recs else {}
                         with log:
                             st.caption(
@@ -250,6 +416,11 @@ with tab_agent:
                 st.markdown(final_text)
 
             if final_recs:
+                if last_inferred_profile:
+                    try:
+                        save_music_profile(current_user["_id"], last_inferred_profile)
+                    except Exception:
+                        pass
                 st.subheader("Top Songs")
                 render_results(final_recs)
 
@@ -263,17 +434,35 @@ with tab_quick:
         "No API key needed — runs the scoring engine directly."
     )
 
+    # Load saved profile for pre-fill
+    try:
+        saved_profile = get_music_profile(current_user["_id"])
+    except Exception:
+        saved_profile = None
+
     col_left, col_right = st.columns(2)
 
     with col_left:
-        genre   = st.selectbox("Favorite genre", genres)
-        mood    = st.selectbox("Favorite mood",  moods)
+        saved_genre = saved_profile.get("favorite_genre") if saved_profile else None
+        genre_index = genres.index(saved_genre) if saved_genre in genres else 0
+        genre = st.selectbox("Favorite genre", genres, index=genre_index)
+
+        saved_mood = saved_profile.get("favorite_mood") if saved_profile else None
+        mood_index = moods.index(saved_mood) if saved_mood in moods else 0
+        mood = st.selectbox("Favorite mood", moods, index=mood_index)
 
     with col_right:
-        energy   = st.slider("Target energy", 0.0, 1.0, 0.6, step=0.05,
-                             help="0 = very calm · 1 = very intense")
-        acoustic = st.checkbox("Prefer acoustic songs")
-        k        = st.slider("Songs to return", 1, 10, 5)
+        saved_energy = saved_profile.get("target_energy", 0.6) if saved_profile else 0.6
+        energy = st.slider("Target energy", 0.0, 1.0, float(saved_energy), step=0.05,
+                           help="0 = very calm · 1 = very intense")
+
+        saved_acoustic = saved_profile.get("likes_acoustic", False) if saved_profile else False
+        acoustic = st.checkbox("Prefer acoustic songs", value=bool(saved_acoustic))
+
+        k = st.slider("Songs to return", 1, 10, 5)
+
+    if saved_profile:
+        st.caption("↑ Pre-filled from your saved taste profile.")
 
     if st.button("Find Songs", type="primary"):
         user_prefs = {
@@ -282,6 +471,12 @@ with tab_quick:
             "target_energy":  energy,
             "likes_acoustic": acoustic,
         }
+
+        # Persist the profile for next time
+        try:
+            save_music_profile(current_user["_id"], user_prefs)
+        except Exception:
+            pass
 
         raw_results = recommend_songs(user_prefs, songs, k=k)
         recs = [
