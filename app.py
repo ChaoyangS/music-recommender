@@ -68,6 +68,7 @@ st.set_page_config(
     page_icon="🎵",
     layout="wide",
     initial_sidebar_state="expanded",
+    menu_items=None,
 )
 
 # ── Global styles ─────────────────────────────────────────────────────────────
@@ -273,11 +274,51 @@ div[data-testid="stNotification"][kind="error"]   { border-left: 4px solid #E353
 /* ── Audio player ── */
 audio { width: 100%; accent-color: #E35341; margin-top: 8px; }
 
+/* ── Hamburger menu — hidden ── */
+#MainMenu { display: none !important; }
+
 /* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: #1a1a1a; }
 ::-webkit-scrollbar-thumb { background: #3a3a3a; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #E35341; }
+
+/* ── Profile photo "+" badge ── */
+.profile-photo-wrap {
+    position: relative;
+    width: 80px;
+    margin: 0 auto;
+}
+.profile-photo-plus {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #E35341;
+    border: 2px solid #171717;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 700;
+    color: white;
+    cursor: pointer;
+    line-height: 1;
+    user-select: none;
+    transition: background 0.15s ease;
+}
+.profile-photo-plus:hover { background: #c94432; }
+/* Push the hidden Streamlit trigger button off-screen */
+.element-container:has(.photo-btn-anchor) + .element-container {
+    position: fixed !important;
+    top: -9999px !important;
+    left: -9999px !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -440,30 +481,41 @@ with st.sidebar:
     # ── Profile photo ──────────────────────────────────────────────────────────
     _photo_b64 = get_profile_photo_b64(current_user["_id"])
     if _photo_b64:
-        st.markdown(
+        _photo_inner = (
             f'<img src="data:image/jpeg;base64,{_photo_b64}" '
-            f'style="width:80px;height:80px;border-radius:50%;object-fit:cover;'
-            f'display:block;margin:0 auto 8px auto;">',
-            unsafe_allow_html=True,
+            f'style="width:80px;height:80px;border-radius:50%;object-fit:cover;display:block;">'
         )
     else:
-        st.markdown(
+        _photo_inner = (
             '<div style="width:80px;height:80px;border-radius:50%;background:#555;'
-            'display:flex;align-items:center;justify-content:center;'
-            'margin:0 auto 8px auto;font-size:36px;">👤</div>',
-            unsafe_allow_html=True,
+            'display:flex;align-items:center;justify-content:center;font-size:36px;">👤</div>'
         )
 
-    st.markdown(f"<div style='text-align:center'><b>{current_user['username']}</b></div>",
+    # Photo with clickable "+" badge; anchor targets the hidden trigger button via CSS
+    st.markdown(
+        f'<div class="profile-photo-wrap">'
+        f'  {_photo_inner}'
+        f'  <div class="profile-photo-plus">{"+" if st.session_state.get("show_photo_upload") else "−"}</div>'
+        f'</div>'
+        f'<span class="photo-btn-anchor"></span>',
+        unsafe_allow_html=True,
+    )
+
+    # Hidden Streamlit trigger — JS wires the "+" badge click to this button
+    if st.button("+photo", key="btn_photo_toggle"):
+        st.session_state.show_photo_upload = not st.session_state.get("show_photo_upload", False)
+
+    st.markdown(f"<div style='text-align:center;margin-top:8px'><b>{current_user['username']}</b></div>",
                 unsafe_allow_html=True)
 
-    with st.expander("Change photo"):
+    if st.session_state.get("show_photo_upload"):
         _upload = st.file_uploader("Upload image", type=["png", "jpg", "jpeg"],
                                    key="photo_upload", label_visibility="collapsed")
         if _upload:
             try:
                 save_profile_photo(current_user["_id"], _upload.read())
                 st.success("Photo updated!")
+                st.session_state.show_photo_upload = False
                 st.experimental_rerun()
             except Exception as _e:
                 st.error(f"Upload failed: {_e}")
@@ -642,6 +694,24 @@ components.html("""
         return panels[idx] || null;
     }
 
+    // Wire the profile photo "+" badge to the hidden Streamlit toggle button.
+    function attachPhotoBtn(doc) {
+        var sidebar = doc.querySelector('[data-testid="stSidebar"]');
+        if (!sidebar) return;
+        var plus = sidebar.querySelector('.profile-photo-plus');
+        if (!plus || plus._wired) return;
+        plus._wired = true;
+        plus.addEventListener('click', function () {
+            var btns = sidebar.querySelectorAll('button');
+            for (var i = 0; i < btns.length; i++) {
+                if ((btns[i].textContent || '').trim() === '+photo') {
+                    btns[i].click();
+                    break;
+                }
+            }
+        });
+    }
+
     function attach() {
         try {
             var doc   = window.parent.document;
@@ -664,9 +734,12 @@ components.html("""
         } catch (e) {}
     }
     attach();
+    attachPhotoBtn(window.parent.document);
     try {
-        new MutationObserver(attach)
-            .observe(window.parent.document.body, { childList: true, subtree: true });
+        new MutationObserver(function () {
+            attach();
+            attachPhotoBtn(window.parent.document);
+        }).observe(window.parent.document.body, { childList: true, subtree: true });
     } catch (e) {}
 })();
 </script>
