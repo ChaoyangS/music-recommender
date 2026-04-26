@@ -1,3 +1,5 @@
+import base64
+import io
 import os
 import secrets
 import uuid
@@ -47,6 +49,31 @@ def authenticate_user(username: str, password: str) -> dict | None:
     if user and bcrypt.checkpw(password.encode(), user["hashed_password"]):
         return {"_id": user["_id"], "username": user["username"]}
     return None
+
+
+# ── Profile photo ─────────────────────────────────────────────────────────────
+
+_PHOTO_SIZE = (128, 128)  # pixels — keeps MongoDB docs small
+
+
+def save_profile_photo(user_id: ObjectId, photo_bytes: bytes) -> None:
+    """Resize and store a profile photo as base64 in the users document."""
+    from PIL import Image
+    img = Image.open(io.BytesIO(photo_bytes)).convert("RGB")
+    img.thumbnail(_PHOTO_SIZE)
+    buf = io.BytesIO()
+    img.save(buf, format="JPEG", quality=85)
+    encoded = base64.b64encode(buf.getvalue()).decode()
+    _users().update_one(
+        {"_id": user_id},
+        {"$set": {"profile_photo": encoded}},
+    )
+
+
+def get_profile_photo_b64(user_id: ObjectId) -> str | None:
+    """Return the base64-encoded JPEG profile photo, or None if not set."""
+    doc = _users().find_one({"_id": user_id}, {"profile_photo": 1})
+    return doc.get("profile_photo") if doc else None
 
 
 # ── Session management ────────────────────────────────────────────────────────
@@ -173,6 +200,85 @@ def verify_and_consume_oauth_state(state: str) -> bool:
         "expires_at": {"$gt": datetime.now(timezone.utc)},
     })
     return result is not None
+
+
+# ── Liked songs ───────────────────────────────────────────────────────────────
+
+def _liked():
+    return get_db().liked_songs
+
+
+def like_song(user_id: ObjectId, song_id: int, song_data: dict) -> None:
+    """Add a song to liked songs (idempotent — silently ignores duplicates)."""
+    try:
+        _liked().insert_one({
+            "user_id":  user_id,
+            "song_id":  song_id,
+            "title":    song_data.get("title", ""),
+            "artist":   song_data.get("artist", ""),
+            "genre":    song_data.get("genre", ""),
+            "mood":     song_data.get("mood", ""),
+            "liked_at": datetime.now(timezone.utc),
+        })
+    except DuplicateKeyError:
+        pass
+
+
+def unlike_song(user_id: ObjectId, song_id: int) -> None:
+    _liked().delete_one({"user_id": user_id, "song_id": song_id})
+
+
+def get_liked_song_ids(user_id: ObjectId) -> set:
+    """Return the set of song_ids the user has liked."""
+    return {doc["song_id"] for doc in _liked().find({"user_id": user_id}, {"song_id": 1})}
+
+
+def get_liked_songs(user_id: ObjectId) -> list:
+    """Return all liked songs for the user, newest first."""
+    return [
+        {k: doc[k] for k in ("song_id", "title", "artist", "genre", "mood", "liked_at")}
+        for doc in _liked().find({"user_id": user_id}).sort("liked_at", -1)
+    ]
+
+
+# ── Disliked songs ─────────────────────────────────────────────────────────────
+
+def _disliked():
+    return get_db().disliked_songs
+
+
+def dislike_song(user_id: ObjectId, song_id: int, song_data: dict) -> None:
+    """Add a song to disliked songs (idempotent). Also removes it from liked songs."""
+    try:
+        _disliked().insert_one({
+            "user_id":      user_id,
+            "song_id":      song_id,
+            "title":        song_data.get("title", ""),
+            "artist":       song_data.get("artist", ""),
+            "genre":        song_data.get("genre", ""),
+            "mood":         song_data.get("mood", ""),
+            "disliked_at":  datetime.now(timezone.utc),
+        })
+    except DuplicateKeyError:
+        pass
+    _liked().delete_one({"user_id": user_id, "song_id": song_id})
+
+
+def undislike_song(user_id: ObjectId, song_id: int) -> None:
+    _disliked().delete_one({"user_id": user_id, "song_id": song_id})
+
+
+def get_disliked_song_ids(user_id: ObjectId) -> set:
+    """Return the set of song_ids the user has disliked."""
+    return {doc["song_id"] for doc in _disliked().find({"user_id": user_id}, {"song_id": 1})}
+
+
+def get_disliked_songs(user_id: ObjectId) -> list:
+    """Return all disliked songs for the user, newest first."""
+    return [
+        {k: doc[k] for k in ("song_id", "title", "artist", "genre", "mood", "disliked_at")}
+        for doc in _disliked().find({"user_id": user_id}).sort("disliked_at", -1)
+    ]
 
 
 def find_or_create_google_user(google_id: str, email: str, name: str) -> dict:

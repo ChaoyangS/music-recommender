@@ -18,7 +18,7 @@ else:
 
 SONGS_PATH = Path(__file__).parent.parent / "data" / "songs.csv"
 
-SYSTEM_PROMPT = """You are a music recommendation agent. For every request, follow these four phases:
+_SYSTEM_TEMPLATE = """You are a music recommendation agent. For every request, follow these four phases:
 
 1. PLAN: Understand the user's taste from their natural language request.
    Identify genre, mood, energy (0.0–1.0), and acoustic preference.
@@ -33,8 +33,18 @@ SYSTEM_PROMPT = """You are a music recommendation agent. For every request, foll
 
 End with a clear explanation of your final recommendations and why they fit the request.
 
-Available genres: pop, lofi, rock, ambient, jazz, synthwave, indie pop, classical, folk, reggae, blues, metal, electronic, country, world
-Available moods: happy, chill, intense, melancholic, relaxed, focused, moody, dreamy, upbeat, soulful, energetic, peaceful, playful, dreamlike"""
+Available genres: {genres}
+Available moods: {moods}"""
+
+
+def build_system_prompt(songs: list[dict]) -> str:
+    genres = ", ".join(sorted({s["genre"] for s in songs}))
+    moods  = ", ".join(sorted({s["mood"]  for s in songs}))
+    return _SYSTEM_TEMPLATE.format(genres=genres, moods=moods)
+
+
+# Backward-compatible alias used by app.py import — loaded lazily on first call.
+SYSTEM_PROMPT = _SYSTEM_TEMPLATE  # replaced at runtime via build_system_prompt(songs)
 
 TOOLS = [
     {
@@ -123,16 +133,31 @@ def _execute_tool(name: str, tool_input: dict[str, Any], songs: list[dict]) -> s
             score, reasons = score_song(user_prefs, song)
             scored.append(
                 {
-                    "title": song["title"],
-                    "artist": song["artist"],
-                    "genre": song["genre"],
-                    "mood": song["mood"],
-                    "score": round(score, 2),
-                    "reasons": reasons,
+                    "song_id":     song["id"],
+                    "title":       song["title"],
+                    "artist":      song["artist"],
+                    "genre":       song["genre"],
+                    "mood":        song["mood"],
+                    "score":       round(score, 2),
+                    "reasons":     reasons,
+                    "preview_url": song.get("preview_url", ""),
                 }
             )
         scored.sort(key=lambda x: x["score"], reverse=True)
-        return json.dumps({"recommendations": scored[:k], "params_used": user_prefs})
+
+        # Cap per-genre so results span multiple genres
+        max_per_genre = max(1, (k + 2) // 3)
+        diverse: list[dict] = []
+        genre_counts: dict[str, int] = {}
+        for rec in scored:
+            if len(diverse) >= k:
+                break
+            g = rec["genre"]
+            if genre_counts.get(g, 0) < max_per_genre:
+                genre_counts[g] = genre_counts.get(g, 0) + 1
+                diverse.append(rec)
+
+        return json.dumps({"recommendations": diverse, "params_used": user_prefs})
 
     if name == "evaluate_quality":
         recs = tool_input.get("recommendations", [])
@@ -175,7 +200,8 @@ def run_agent(user_request: str, verbose: bool = True) -> str:
     self-evaluates quality, and retries with adjusted params if needed.
     """
     client = anthropic.Anthropic()
-    songs = load_songs(str(SONGS_PATH))
+    songs  = load_songs(str(SONGS_PATH))
+    system_prompt = build_system_prompt(songs)
 
     messages: list[dict] = [{"role": "user", "content": user_request}]
 
@@ -201,7 +227,7 @@ def run_agent(user_request: str, verbose: bool = True) -> str:
             system=[
                 {
                     "type": "text",
-                    "text": SYSTEM_PROMPT,
+                    "text": system_prompt,
                     "cache_control": {"type": "ephemeral"},
                 }
             ],

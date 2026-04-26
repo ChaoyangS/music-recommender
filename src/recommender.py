@@ -75,20 +75,20 @@ def load_songs(csv_path: str) -> List[Dict]:
         reader = csv.DictReader(csvfile)
         for row in reader:
             song = {
-                "id": int(row["id"]),
-                "title": row["title"],
-                "artist": row["artist"],
-                "genre": row["genre"],
-                "mood": row["mood"],
-                "energy": float(row["energy"]),
-                "tempo_bpm": float(row["tempo_bpm"]),
-                "valence": float(row["valence"]),
+                "id":           int(row["id"]),
+                "title":        row["title"],
+                "artist":       row["artist"],
+                "genre":        row["genre"],
+                "mood":         row["mood"],
+                "energy":       float(row["energy"]),
+                "tempo_bpm":    float(row["tempo_bpm"]),
+                "valence":      float(row["valence"]),
                 "danceability": float(row["danceability"]),
                 "acousticness": float(row["acousticness"]),
+                "preview_url":  row.get("preview_url", ""),
             }
             songs.append(song)
 
-    print(f"Loaded songs: {len(songs)}")
     return songs
 
 def score_song(user_prefs: Dict, song: Dict) -> Tuple[float, List[str]]:
@@ -129,12 +129,24 @@ def score_song(user_prefs: Dict, song: Dict) -> Tuple[float, List[str]]:
     return score, reasons
 
 def recommend_songs(user_prefs: Dict, songs: List[Dict], k: int = 5) -> List[Tuple[Dict, float, str]]:
-    """Rank songs using score_song and return the top K recommendations."""
+    """Rank songs using score_song and return the top K recommendations with genre diversity."""
     scored_songs: List[Tuple[Dict, float, str]] = []
     for song in songs:
         score, reasons = score_song(user_prefs, song)
-        explanation = "; ".join(reasons)
-        scored_songs.append((song, score, explanation))
+        scored_songs.append((song, score, "; ".join(reasons)))
 
     scored_songs.sort(key=lambda item: item[1], reverse=True)
-    return scored_songs[:k]
+
+    # Cap per-genre so results span multiple genres
+    max_per_genre = max(1, (k + 2) // 3)
+    results: List[Tuple[Dict, float, str]] = []
+    genre_counts: Dict[str, int] = {}
+    for item in scored_songs:
+        if len(results) >= k:
+            break
+        genre = item[0]["genre"]
+        if genre_counts.get(genre, 0) < max_per_genre:
+            genre_counts[genre] = genre_counts.get(genre, 0) + 1
+            results.append(item)
+
+    return results

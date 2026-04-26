@@ -22,3 +22,5 @@ def init_indexes() -> None:
     db.music_profiles.create_index("user_id", unique=True)
     db.oauth_states.create_index("expires_at", expireAfterSeconds=0)  # TTL auto-cleanup
     db.oauth_states.create_index("state", unique=True)
+    db.liked_songs.create_index([("user_id", ASCENDING), ("song_id", ASCENDING)], unique=True)
+    db.disliked_songs.create_index([("user_id", ASCENDING), ("song_id", ASCENDING)], unique=True)

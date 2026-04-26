@@ -6,3 +6,4 @@ streamlit
 pymongo
 bcrypt
 requests
+Pillow
