@@ -73,254 +73,1070 @@ st.set_page_config(
 
 # ── Global styles ─────────────────────────────────────────────────────────────
 
-st.markdown("""
+# st.markdown("""
+# <style>
+# @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap');
+
+# /* ── Base ── */
+# html, body, [class*="css"], .stApp {
+#     font-family: 'DM Sans', sans-serif !important;
+#     background-color: #212121;
+#     color: #F2E3CF;
+# }
+
+# /* ── Sidebar ── */
+# section[data-testid="stSidebar"] {
+#     background-color: #171717 !important;
+#     border-right: 1px solid #2e2e2e;
+# }
+# section[data-testid="stSidebar"] * { color: #F2E3CF !important; }
+# section[data-testid="stSidebar"] .stButton button {
+#     width: 100%;
+#     background: transparent !important;
+#     border: 1px solid #3a3a3a !important;
+#     color: #B8A898 !important;
+#     font-size: 13px;
+# }
+# section[data-testid="stSidebar"] .stButton button:hover {
+#     border-color: #E35341 !important;
+#     color: #F2E3CF !important;
+# }
+
+# /* ── Typography ── */
+# h1 {
+#     font-size: 2.4rem !important;
+#     font-weight: 700 !important;
+#     letter-spacing: -0.04em !important;
+#     color: #F2E3CF !important;
+#     line-height: 1.1 !important;
+# }
+# h2, h3 {
+#     font-weight: 600 !important;
+#     letter-spacing: -0.03em !important;
+#     color: #F2E3CF !important;
+# }
+# p, span, label, .stMarkdown { color: #F2E3CF; }
+# .stCaption, small { color: #B8A898 !important; font-size: 13px !important; }
+
+# /* ── Tabs ── */
+# .stTabs [data-baseweb="tab-list"] {
+#     background: transparent;
+#     border-bottom: 1px solid #2e2e2e;
+#     gap: 4px;
+# }
+# .stTabs [data-baseweb="tab"] {
+#     background: transparent !important;
+#     color: #888 !important;
+#     border-radius: 0 !important;
+#     font-weight: 500;
+#     letter-spacing: -0.02em;
+#     padding: 10px 20px;
+#     border-bottom: 2px solid transparent;
+# }
+# .stTabs [data-baseweb="tab"]:hover { color: #F2E3CF !important; }
+# .stTabs [aria-selected="true"] {
+#     color: #F2E3CF !important;
+#     border-bottom: 2px solid #E35341 !important;
+#     background: transparent !important;
+# }
+# .stTabs [data-baseweb="tab-highlight"] { display: none; }
+# .stTabs [data-baseweb="tab-border"] { display: none; }
+
+# /* ── Buttons ── */
+# .stButton button {
+#     background-color: #E35341 !important;
+#     color: #fff !important;
+#     border: none !important;
+#     border-radius: 6px !important;
+#     font-weight: 600 !important;
+#     letter-spacing: -0.02em !important;
+#     padding: 8px 20px !important;
+#     transition: background 0.15s ease !important;
+# }
+# .stButton button:hover {
+#     background-color: #c94432 !important;
+#     color: #fff !important;
+# }
+# /* Clear any dark background injected into button children */
+# .stButton button div,
+# .stButton button p,
+# .stButton button span {
+#     background: transparent !important;
+#     background-color: transparent !important;
+# }
+# /* Small icon buttons (like/dislike) — scoped to inside song card expanders only */
+# [data-testid="stExpander"] [data-testid="column"] .stButton button {
+#     background: transparent !important;
+#     color: #F2E3CF !important;
+#     border: none !important;
+#     box-shadow: none !important;
+#     padding: 4px 8px !important;
+#     font-size: 18px !important;
+#     transition: transform 0.1s ease !important;
+# }
+# [data-testid="stExpander"] [data-testid="column"] .stButton button:hover {
+#     background: transparent !important;
+#     border: none !important;
+#     box-shadow: none !important;
+#     transform: scale(1.25) !important;
+# }
+
+# /* ── Song cards (expanders) ── */
+# .stExpander {
+#     background-color: #1e1e1e !important;
+#     border: 1px solid #2e2e2e !important;
+#     border-radius: 10px !important;
+#     margin-bottom: 8px !important;
+# }
+# .stExpander summary {
+#     color: #F2E3CF !important;
+#     font-weight: 500 !important;
+#     letter-spacing: -0.02em !important;
+# }
+# .stExpander summary:hover { color: #E35341 !important; }
+# details[data-testid="stExpander"] { border: 1px solid #2e2e2e !important; }
+
+# /* ── Metrics ── */
+# [data-testid="stMetric"] {
+#     background: #1e1e1e;
+#     border: 1px solid #2e2e2e;
+#     border-radius: 8px;
+#     padding: 12px 16px !important;
+# }
+# [data-testid="stMetricValue"] {
+#     color: #F2E3CF !important;
+#     font-size: 1.4rem !important;
+#     font-weight: 600 !important;
+#     letter-spacing: -0.03em !important;
+# }
+# [data-testid="stMetricLabel"] { color: #B8A898 !important; font-size: 12px !important; }
+
+# /* ── Progress bar ── */
+# .stProgress > div > div > div > div { background-color: #E35341 !important; }
+# .stProgress > div > div > div { background-color: #2e2e2e !important; }
+
+# /* ── Inputs ── */
+# .stTextInput input, .stTextArea textarea {
+#     background-color: #1e1e1e !important;
+#     color: #F2E3CF !important;
+#     border: 1px solid #3a3a3a !important;
+#     border-radius: 6px !important;
+# }
+# .stTextInput input:focus, .stTextArea textarea:focus {
+#     border-color: #E35341 !important;
+#     box-shadow: 0 0 0 2px rgba(227,83,65,0.2) !important;
+# }
+
+# /* ── Selectbox / Dropdown ── */
+# .stSelectbox > div > div, [data-baseweb="select"] > div {
+#     background-color: #1e1e1e !important;
+#     border-color: #3a3a3a !important;
+#     color: #F2E3CF !important;
+# }
+
+# /* ── Slider ── */
+# .stSlider [data-baseweb="slider"] [data-testid="stThumb"] { background: #E35341 !important; }
+# .stSlider [data-baseweb="slider"] [role="progressbar"] { background: #E35341 !important; }
+
+# /* ── Checkbox ── */
+# .stCheckbox label span { color: #F2E3CF !important; }
+
+# /* ── Dividers ── */
+# hr { border-color: #2e2e2e !important; }
+
+# /* ── Alert boxes ── */
+# [data-baseweb="notification"] {
+#     background-color: #1e1e1e !important;
+#     border-color: #3a3a3a !important;
+#     color: #F2E3CF !important;
+# }
+# [data-testid="stNotification"],
+# div[role="alert"] {
+#     background-color: #1e1e1e !important;
+#     color: #F2E3CF !important;
+# }
+# /* Success → blue left border; Warning/Error → coral */
+# div[data-testid="stNotification"][kind="success"],
+# .stAlert [kind="success"] { border-left: 4px solid #0099FF !important; }
+# div[data-testid="stNotification"][kind="info"]    { border-left: 4px solid #0099FF !important; }
+# div[data-testid="stNotification"][kind="warning"] { border-left: 4px solid #E35341 !important; }
+# div[data-testid="stNotification"][kind="error"]   { border-left: 4px solid #E35341 !important; }
+# /* Catch-all for any remaining green/coloured alert backgrounds */
+# .stAlert, .stAlert > div { background-color: #1e1e1e !important; color: #F2E3CF !important; }
+
+# /* ── Number input ── */
+# .stNumberInput input {
+#     background-color: #1e1e1e !important;
+#     color: #F2E3CF !important;
+#     border: 1px solid #3a3a3a !important;
+# }
+
+# /* ── Audio player ── */
+# audio { width: 100%; accent-color: #E35341; margin-top: 8px; }
+
+# /* ── Hamburger menu — hidden ── */
+# #MainMenu { display: none !important; }
+
+# /* ── Scrollbar ── */
+# ::-webkit-scrollbar { width: 6px; height: 6px; }
+# ::-webkit-scrollbar-track { background: #1a1a1a; }
+# ::-webkit-scrollbar-thumb { background: #3a3a3a; border-radius: 3px; }
+# ::-webkit-scrollbar-thumb:hover { background: #E35341; }
+
+# /* ── Profile photo "+" badge ── */
+# .profile-photo-wrap {
+#     position: relative;
+#     width: 80px;
+#     margin: 0 auto;
+# }
+# .profile-photo-plus {
+#     position: absolute;
+#     bottom: 0;
+#     right: 0;
+#     width: 22px;
+#     height: 22px;
+#     border-radius: 50%;
+#     background: #E35341;
+#     border: 2px solid #171717;
+#     display: flex;
+#     align-items: center;
+#     justify-content: center;
+#     font-size: 15px;
+#     font-weight: 700;
+#     color: white;
+#     cursor: pointer;
+#     line-height: 1;
+#     user-select: none;
+#     transition: background 0.15s ease;
+# }
+# .profile-photo-plus:hover { background: #c94432; }
+# /* Push the hidden Streamlit trigger button off-screen */
+# .element-container:has(.photo-btn-anchor) + .element-container {
+#     position: fixed !important;
+#     top: -9999px !important;
+#     left: -9999px !important;
+#     width: 0 !important;
+#     height: 0 !important;
+#     overflow: hidden !important;
+# }
+# </style>
+# """, unsafe_allow_html=True)
+
+#SECOND ITERATION
+
+# ── SVG grain texture (tiny tiling noise pattern) ─────────────────────────────
+# GRAIN_SVG = (
+#     "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E"
+#     "%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' "
+#     "stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' "
+#     "opacity='0.035'/%3E%3C/svg%3E\")"
+# )
+
+# STYLES = f"""
+# <style>
+# @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap');
+
+# /* ── CSS custom properties ── */
+# :root {{
+#   --bg:          #1a1612;
+#   --surface:     #231d17;
+#   --surface-2:   #2c2419;
+#   --accent:      #C4623A;
+#   --accent-dim:  #9E4E2E;
+#   --cream:       #E8DCC8;
+#   --sand:        #B5A592;
+#   --border:      #3a3028;
+#   --grain:       {GRAIN_SVG};
+# }}
+
+# /* ── Base ── */
+# html, body, [class*="css"], .stApp {{
+#   font-family: 'DM Sans', sans-serif !important;
+#   background-color: var(--bg) !important;
+#   color: var(--cream) !important;
+# }}
+
+# /* Grain overlay on the app shell */
+# .stApp::before {{
+#   content: '';
+#   position: fixed;
+#   inset: 0;
+#   background-image: var(--grain);
+#   background-repeat: repeat;
+#   pointer-events: none;
+#   z-index: 0;
+#   opacity: 1;
+# }}
+
+# /* ── Sidebar ── */
+# section[data-testid="stSidebar"] {{
+#   background-color: #14110e !important;
+#   border-right: 1px solid var(--border) !important;
+# }}
+# section[data-testid="stSidebar"] * {{ color: var(--cream) !important; }}
+# section[data-testid="stSidebar"] .stButton button {{
+#   width: 100%;
+#   background: transparent !important;
+#   border: 1px solid var(--border) !important;
+#   color: var(--sand) !important;
+#   font-size: 13px;
+#   border-radius: 20px !important;
+#   letter-spacing: 0.01em;
+# }}
+# section[data-testid="stSidebar"] .stButton button:hover {{
+#   border-color: var(--accent) !important;
+#   color: var(--cream) !important;
+#   background: rgba(196,98,58,0.08) !important;
+# }}
+
+# /* ── Typography ── */
+# h1 {{
+#   font-family: 'Playfair Display', Georgia, serif !important;
+#   font-size: 2.6rem !important;
+#   font-weight: 500 !important;
+#   font-style: italic !important;
+#   letter-spacing: -0.02em !important;
+#   color: var(--cream) !important;
+#   line-height: 1.1 !important;
+# }}
+# h2 {{
+#   font-family: 'Playfair Display', Georgia, serif !important;
+#   font-weight: 500 !important;
+#   font-style: italic !important;
+#   letter-spacing: -0.02em !important;
+#   color: var(--cream) !important;
+# }}
+# h3 {{
+#   font-family: 'DM Sans', sans-serif !important;
+#   font-weight: 500 !important;
+#   letter-spacing: -0.02em !important;
+#   color: var(--cream) !important;
+# }}
+# p, span, label, .stMarkdown {{ color: var(--cream); }}
+# .stCaption, small {{
+#   color: var(--sand) !important;
+#   font-size: 13px !important;
+#   line-height: 1.6 !important;
+# }}
+
+# /* ── Tabs — underline-draw style ── */
+# .stTabs [data-baseweb="tab-list"] {{
+#   background: transparent;
+#   border-bottom: 1px solid var(--border);
+#   gap: 0;
+# }}
+# .stTabs [data-baseweb="tab"] {{
+#   background: transparent !important;
+#   color: var(--sand) !important;
+#   border-radius: 0 !important;
+#   font-family: 'DM Sans', sans-serif !important;
+#   font-weight: 400;
+#   font-size: 14px;
+#   letter-spacing: 0.02em;
+#   padding: 12px 24px;
+#   border-bottom: 1.5px solid transparent;
+#   transition: color 0.2s ease, border-color 0.2s ease;
+# }}
+# .stTabs [data-baseweb="tab"]:hover {{ color: var(--cream) !important; }}
+# .stTabs [aria-selected="true"] {{
+#   color: var(--cream) !important;
+#   border-bottom: 1.5px solid var(--accent) !important;
+#   background: transparent !important;
+# }}
+# .stTabs [data-baseweb="tab-highlight"],
+# .stTabs [data-baseweb="tab-border"] {{ display: none; }}
+
+# /* ── Buttons ── */
+# .stButton button {{
+#   background-color: var(--accent) !important;
+#   color: #fff !important;
+#   border: none !important;
+#   border-radius: 20px !important;
+#   font-weight: 500 !important;
+#   font-family: 'DM Sans', sans-serif !important;
+#   letter-spacing: 0.01em !important;
+#   padding: 9px 24px !important;
+#   transition: background 0.2s ease, transform 0.1s ease !important;
+# }}
+# .stButton button:hover {{
+#   background-color: var(--accent-dim) !important;
+#   transform: translateY(-1px) !important;
+# }}
+# .stButton button:active {{
+#   transform: translateY(0) !important;
+# }}
+# .stButton button div,
+# .stButton button p,
+# .stButton button span {{
+#   background: transparent !important;
+#   background-color: transparent !important;
+# }}
+
+# /* Icon buttons inside song card expanders */
+# [data-testid="stExpander"] [data-testid="column"] .stButton button {{
+#   background: transparent !important;
+#   color: var(--cream) !important;
+#   border: none !important;
+#   box-shadow: none !important;
+#   padding: 4px 8px !important;
+#   font-size: 18px !important;
+#   border-radius: 50% !important;
+#   transition: transform 0.15s ease, background 0.15s ease !important;
+# }}
+# [data-testid="stExpander"] [data-testid="column"] .stButton button:hover {{
+#   background: rgba(196,98,58,0.15) !important;
+#   transform: scale(1.2) !important;
+# }}
+
+# /* ── Song cards (expanders) ── */
+# .stExpander {{
+#   background-color: var(--surface) !important;
+#   border: 1px solid var(--border) !important;
+#   border-radius: 14px !important;
+#   margin-bottom: 10px !important;
+#   border-left: 3px solid var(--accent) !important;
+#   transition: border-color 0.2s ease, background 0.2s ease !important;
+# }}
+# .stExpander:hover {{
+#   background-color: var(--surface-2) !important;
+#   border-left-color: var(--accent) !important;
+# }}
+# .stExpander summary {{
+#   color: var(--cream) !important;
+#   font-weight: 500 !important;
+#   font-family: 'DM Sans', sans-serif !important;
+#   letter-spacing: -0.01em !important;
+#   padding: 4px 0 !important;
+# }}
+# .stExpander summary:hover {{ color: var(--accent) !important; }}
+# details[data-testid="stExpander"] {{ border: none !important; }}
+
+# /* ── Metrics — pill style ── */
+# [data-testid="stMetric"] {{
+#   background: var(--surface);
+#   border: 1px solid var(--border);
+#   border-radius: 12px;
+#   padding: 14px 18px !important;
+# }}
+# [data-testid="stMetricValue"] {{
+#   color: var(--cream) !important;
+#   font-family: 'Playfair Display', serif !important;
+#   font-size: 1.5rem !important;
+#   font-weight: 400 !important;
+#   letter-spacing: -0.02em !important;
+# }}
+# [data-testid="stMetricLabel"] {{
+#   color: var(--sand) !important;
+#   font-size: 11px !important;
+#   text-transform: uppercase;
+#   letter-spacing: 0.08em !important;
+# }}
+
+# /* ── Progress bar ── */
+# .stProgress > div > div > div > div {{
+#   background: linear-gradient(90deg, var(--accent-dim), var(--accent)) !important;
+#   border-radius: 99px !important;
+# }}
+# .stProgress > div > div > div {{
+#   background-color: var(--border) !important;
+#   border-radius: 99px !important;
+# }}
+
+# /* ── Inputs ── */
+# .stTextInput input, .stTextArea textarea {{
+#   background-color: var(--surface) !important;
+#   color: var(--cream) !important;
+#   border: 1px solid var(--border) !important;
+#   border-radius: 10px !important;
+#   font-family: 'DM Sans', sans-serif !important;
+# }}
+# .stTextInput input::placeholder, .stTextArea textarea::placeholder {{
+#   color: var(--sand) !important;
+#   opacity: 0.7;
+# }}
+# .stTextInput input:focus, .stTextArea textarea:focus {{
+#   border-color: var(--accent) !important;
+#   box-shadow: 0 0 0 2px rgba(196,98,58,0.18) !important;
+# }}
+
+# /* ── Selectbox ── */
+# .stSelectbox > div > div, [data-baseweb="select"] > div {{
+#   background-color: var(--surface) !important;
+#   border-color: var(--border) !important;
+#   color: var(--cream) !important;
+#   border-radius: 10px !important;
+# }}
+
+# /* ── Slider ── */
+# .stSlider [data-baseweb="slider"] [data-testid="stThumb"] {{
+#   background: var(--accent) !important;
+#   box-shadow: 0 0 0 3px rgba(196,98,58,0.25) !important;
+# }}
+# .stSlider [data-baseweb="slider"] [role="progressbar"] {{
+#   background: var(--accent) !important;
+# }}
+
+# /* ── Checkbox ── */
+# .stCheckbox label span {{ color: var(--cream) !important; }}
+
+# /* ── Dividers — organic wavy line ── */
+# hr {{
+#   border: none !important;
+#   height: 1px !important;
+#   background: repeating-linear-gradient(
+#     90deg,
+#     var(--border) 0px,
+#     var(--border) 6px,
+#     transparent 6px,
+#     transparent 10px
+#   ) !important;
+#   opacity: 0.7;
+#   margin: 1.2rem 0 !important;
+# }}
+
+# /* ── Alert boxes ── */
+# [data-baseweb="notification"],
+# [data-testid="stNotification"],
+# div[role="alert"],
+# .stAlert,
+# .stAlert > div {{
+#   background-color: var(--surface) !important;
+#   border-color: var(--border) !important;
+#   color: var(--cream) !important;
+#   border-radius: 10px !important;
+# }}
+# div[data-testid="stNotification"][kind="success"],
+# .stAlert [kind="success"] {{ border-left: 3px solid #8BAF6E !important; }}
+# div[data-testid="stNotification"][kind="info"] {{ border-left: 3px solid #6B99C4 !important; }}
+# div[data-testid="stNotification"][kind="warning"] {{ border-left: 3px solid var(--accent) !important; }}
+# div[data-testid="stNotification"][kind="error"]   {{ border-left: 3px solid #C45A4A !important; }}
+
+# /* ── Number input ── */
+# .stNumberInput input {{
+#   background-color: var(--surface) !important;
+#   color: var(--cream) !important;
+#   border: 1px solid var(--border) !important;
+#   border-radius: 10px !important;
+# }}
+
+# /* ── Audio player ── */
+# audio {{
+#   width: 100%;
+#   accent-color: var(--accent);
+#   margin-top: 10px;
+#   border-radius: 8px;
+#   opacity: 0.9;
+# }}
+
+# /* ── Hide hamburger ── */
+# #MainMenu {{ display: none !important; }}
+
+# /* ── Scrollbar ── */
+# ::-webkit-scrollbar {{ width: 5px; height: 5px; }}
+# ::-webkit-scrollbar-track {{ background: var(--bg); }}
+# ::-webkit-scrollbar-thumb {{
+#   background: var(--border);
+#   border-radius: 99px;
+# }}
+# ::-webkit-scrollbar-thumb:hover {{ background: var(--accent); }}
+
+# /* ── Profile photo badge ── */
+# .profile-photo-wrap {{
+#   position: relative;
+#   width: 80px;
+#   margin: 0 auto;
+# }}
+# .profile-photo-plus {{
+#   position: absolute;
+#   bottom: 2px;
+#   right: 2px;
+#   width: 20px;
+#   height: 20px;
+#   border-radius: 50%;
+#   background: var(--accent);
+#   border: 2px solid #14110e;
+#   display: flex;
+#   align-items: center;
+#   justify-content: center;
+#   font-size: 13px;
+#   font-weight: 600;
+#   color: #fff;
+#   cursor: pointer;
+#   user-select: none;
+#   transition: background 0.15s ease;
+# }}
+# .profile-photo-plus:hover {{ background: var(--accent-dim); }}
+# .element-container:has(.photo-btn-anchor) + .element-container {{
+#   position: fixed !important;
+#   top: -9999px !important;
+#   left: -9999px !important;
+#   width: 0 !important;
+#   height: 0 !important;
+#   overflow: hidden !important;
+# }}
+
+# /* ── Subheaders with serif accent ── */
+# .stMarkdown h2, .stMarkdown h3 {{
+#   font-family: 'Playfair Display', Georgia, serif !important;
+#   font-style: italic !important;
+# }}
+
+# /* ── Code / inline code ── */
+# code {{
+#   background: var(--surface-2) !important;
+#   color: var(--accent) !important;
+#   border-radius: 5px !important;
+#   padding: 1px 5px !important;
+#   font-size: 12px !important;
+# }}
+# </style>
+# """
+
+
+GRAIN_SVG = (
+    "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='250'%3E"
+    "%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.68' numOctaves='4' "
+    "stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='250' height='250' filter='url(%23n)' "
+    "opacity='0.045'/%3E%3C/svg%3E\")"
+)
+
+STYLES = f"""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=DM+Mono:ital,wght@0,300;0,400;1,300&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap');
+
+/* ── Tokens ── */
+:root {{
+  --bg:         #171310;
+  --surface:    #1e1814;
+  --surface-2:  #252019;
+  --accent:     #BF5A34;
+  --cream:      #EAE0CC;
+  --sand:       #A89880;
+  --faded:      #6B5C4A;
+  --border:     #2e2620;
+  --border-dim: #231e19;
+  --grain:      {GRAIN_SVG};
+  --mono:       'DM Mono', 'Courier New', monospace;
+  --serif:      'Playfair Display', Georgia, serif;
+  --sans:       'DM Sans', system-ui, sans-serif;
+}}
 
 /* ── Base ── */
-html, body, [class*="css"], .stApp {
-    font-family: 'DM Sans', sans-serif !important;
-    background-color: #212121;
-    color: #F2E3CF;
-}
+html, body, [class*="css"], .stApp {{
+  font-family: var(--sans) !important;
+  background-color: var(--bg) !important;
+  color: var(--cream) !important;
+}}
+.stApp::after {{
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: var(--grain);
+  background-repeat: repeat;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 1;
+}}
 
-/* ── Sidebar ── */
-section[data-testid="stSidebar"] {
-    background-color: #171717 !important;
-    border-right: 1px solid #2e2e2e;
-}
-section[data-testid="stSidebar"] * { color: #F2E3CF !important; }
-section[data-testid="stSidebar"] .stButton button {
-    width: 100%;
-    background: transparent !important;
-    border: 1px solid #3a3a3a !important;
-    color: #B8A898 !important;
-    font-size: 13px;
-}
-section[data-testid="stSidebar"] .stButton button:hover {
-    border-color: #E35341 !important;
-    color: #F2E3CF !important;
-}
+/* ── Sidebar — second sheet of paper ── */
+section[data-testid="stSidebar"] {{
+  background-color: #110f0c !important;
+  border-right: 1px solid var(--border) !important;
+}}
+section[data-testid="stSidebar"] * {{ color: var(--cream) !important; }}
+
+/* Sidebar buttons: flat, rectangular, mono */
+section[data-testid="stSidebar"] .stButton button {{
+  width: 100%;
+  background: transparent !important;
+  border: none !important;
+  border-top: 1px solid var(--border) !important;
+  border-radius: 0 !important;
+  color: var(--sand) !important;
+  font-family: var(--mono) !important;
+  font-size: 11px !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  padding: 10px 4px !important;
+  text-align: left !important;
+  transition: color 0.15s, padding-left 0.15s !important;
+}}
+section[data-testid="stSidebar"] .stButton button:hover {{
+  color: var(--cream) !important;
+  padding-left: 10px !important;
+  background: transparent !important;
+}}
 
 /* ── Typography ── */
-h1 {
-    font-size: 2.4rem !important;
-    font-weight: 700 !important;
-    letter-spacing: -0.04em !important;
-    color: #F2E3CF !important;
-    line-height: 1.1 !important;
-}
-h2, h3 {
-    font-weight: 600 !important;
-    letter-spacing: -0.03em !important;
-    color: #F2E3CF !important;
-}
-p, span, label, .stMarkdown { color: #F2E3CF; }
-.stCaption, small { color: #B8A898 !important; font-size: 13px !important; }
+h1 {{
+  font-family: var(--serif) !important;
+  font-size: 3rem !important;
+  font-weight: 700 !important;
+  font-style: italic !important;
+  letter-spacing: -0.03em !important;
+  color: var(--cream) !important;
+  line-height: 1.0 !important;
+  border-bottom: 1px solid var(--border) !important;
+  padding-bottom: 0.4em !important;
+  margin-bottom: 0.2em !important;
+}}
+h2 {{
+  font-family: var(--serif) !important;
+  font-size: 1.6rem !important;
+  font-weight: 400 !important;
+  font-style: italic !important;
+  color: var(--cream) !important;
+  letter-spacing: -0.01em !important;
+  border-left: 2px solid var(--accent) !important;
+  padding-left: 10px !important;
+  border-radius: 0 !important;
+  margin-top: 1.2rem !important;
+}}
+h3 {{
+  font-family: var(--mono) !important;
+  font-size: 10px !important;
+  font-weight: 400 !important;
+  color: var(--sand) !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  margin-bottom: 0.6rem !important;
+}}
+p, span, label, .stMarkdown {{ color: var(--cream); }}
+.stCaption, small {{
+  font-family: var(--mono) !important;
+  color: var(--faded) !important;
+  font-size: 11px !important;
+  letter-spacing: 0.02em !important;
+  line-height: 1.7 !important;
+}}
 
 /* ── Tabs ── */
-.stTabs [data-baseweb="tab-list"] {
-    background: transparent;
-    border-bottom: 1px solid #2e2e2e;
-    gap: 4px;
-}
-.stTabs [data-baseweb="tab"] {
-    background: transparent !important;
-    color: #888 !important;
-    border-radius: 0 !important;
-    font-weight: 500;
-    letter-spacing: -0.02em;
-    padding: 10px 20px;
-    border-bottom: 2px solid transparent;
-}
-.stTabs [data-baseweb="tab"]:hover { color: #F2E3CF !important; }
-.stTabs [aria-selected="true"] {
-    color: #F2E3CF !important;
-    border-bottom: 2px solid #E35341 !important;
-    background: transparent !important;
-}
-.stTabs [data-baseweb="tab-highlight"] { display: none; }
-.stTabs [data-baseweb="tab-border"] { display: none; }
+.stTabs [data-baseweb="tab-list"] {{
+  background: transparent;
+  border-bottom: 1px solid var(--border);
+  gap: 0;
+  padding: 0;
+}}
+.stTabs [data-baseweb="tab"] {{
+  background: transparent !important;
+  color: var(--faded) !important;
+  border-radius: 0 !important;
+  font-family: var(--mono) !important;
+  font-size: 10px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  padding: 14px 20px !important;
+  border-bottom: 1px solid transparent !important;
+  transition: color 0.2s !important;
+}}
+.stTabs [data-baseweb="tab"]:hover {{ color: var(--cream) !important; }}
+.stTabs [aria-selected="true"] {{
+  color: var(--cream) !important;
+  border-bottom: 1px solid var(--accent) !important;
+  background: transparent !important;
+}}
+.stTabs [data-baseweb="tab-highlight"],
+.stTabs [data-baseweb="tab-border"] {{ display: none !important; }}
 
-/* ── Buttons ── */
-.stButton button {
-    background-color: #E35341 !important;
-    color: #fff !important;
-    border: none !important;
-    border-radius: 6px !important;
-    font-weight: 600 !important;
-    letter-spacing: -0.02em !important;
-    padding: 8px 20px !important;
-    transition: background 0.15s ease !important;
-}
-.stButton button:hover {
-    background-color: #c94432 !important;
-    color: #fff !important;
-}
-/* Clear any dark background injected into button children */
+/* ── Buttons — no radius, shift on hover ── */
+.stButton button {{
+  background-color: transparent !important;
+  color: var(--cream) !important;
+  border: 1px solid var(--sand) !important;
+  border-radius: 0 !important;
+  font-family: var(--mono) !important;
+  font-size: 11px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+  padding: 10px 20px !important;
+  transition: border-color 0.15s, transform 0.1s, box-shadow 0.1s !important;
+  position: relative !important;
+}}
+.stButton button:hover {{
+  border-color: var(--accent) !important;
+  color: var(--cream) !important;
+  background: transparent !important;
+  transform: translate(-2px, -2px) !important;
+  box-shadow: 2px 2px 0 var(--accent) !important;
+}}
+.stButton button:active {{
+  transform: translate(0, 0) !important;
+  box-shadow: none !important;
+}}
 .stButton button div,
 .stButton button p,
-.stButton button span {
-    background: transparent !important;
-    background-color: transparent !important;
-}
-/* Small icon buttons (like/dislike) — scoped to inside song card expanders only */
-[data-testid="stExpander"] [data-testid="column"] .stButton button {
-    background: transparent !important;
-    color: #F2E3CF !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 4px 8px !important;
-    font-size: 18px !important;
-    transition: transform 0.1s ease !important;
-}
-[data-testid="stExpander"] [data-testid="column"] .stButton button:hover {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    transform: scale(1.25) !important;
-}
+.stButton button span {{
+  background: transparent !important;
+  background-color: transparent !important;
+}}
 
-/* ── Song cards (expanders) ── */
-.stExpander {
-    background-color: #1e1e1e !important;
-    border: 1px solid #2e2e2e !important;
-    border-radius: 10px !important;
-    margin-bottom: 8px !important;
-}
-.stExpander summary {
-    color: #F2E3CF !important;
-    font-weight: 500 !important;
-    letter-spacing: -0.02em !important;
-}
-.stExpander summary:hover { color: #E35341 !important; }
-details[data-testid="stExpander"] { border: 1px solid #2e2e2e !important; }
+/* Icon buttons inside expanders */
+[data-testid="stExpander"] [data-testid="column"] .stButton button {{
+  background: transparent !important;
+  color: var(--faded) !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 4px 6px !important;
+  font-size: 16px !important;
+  font-family: inherit !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  transition: color 0.15s, transform 0.1s !important;
+}}
+[data-testid="stExpander"] [data-testid="column"] .stButton button:hover {{
+  color: var(--accent) !important;
+  transform: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  background: transparent !important;
+}}
 
-/* ── Metrics ── */
-[data-testid="stMetric"] {
-    background: #1e1e1e;
-    border: 1px solid #2e2e2e;
-    border-radius: 8px;
-    padding: 12px 16px !important;
-}
-[data-testid="stMetricValue"] {
-    color: #F2E3CF !important;
-    font-size: 1.4rem !important;
-    font-weight: 600 !important;
-    letter-spacing: -0.03em !important;
-}
-[data-testid="stMetricLabel"] { color: #B8A898 !important; font-size: 12px !important; }
+/* ── Song cards — ruled lines, not boxes ── */
+.stExpander {{
+  background: transparent !important;
+  border: none !important;
+  border-top: 1px solid var(--border) !important;
+  border-radius: 0 !important;
+  margin-bottom: 0 !important;
+  padding: 0 !important;
+  position: relative !important;
+}}
+.stExpander::before {{
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: transparent;
+  transition: background 0.2s;
+}}
+.stExpander:hover::before {{
+  background: var(--accent);
+}}
+.stExpander:last-child {{
+  border-bottom: 1px solid var(--border) !important;
+}}
+.stExpander summary {{
+  color: var(--cream) !important;
+  font-family: var(--sans) !important;
+  font-weight: 400 !important;
+  font-size: 14px !important;
+  letter-spacing: -0.01em !important;
+  padding: 14px 0 14px 12px !important;
+}}
+.stExpander summary:hover {{ color: var(--accent) !important; }}
+details[data-testid="stExpander"] {{ border: none !important; }}
+
+/* ── Metrics — mono data style ── */
+[data-testid="stMetric"] {{
+  background: transparent;
+  border: none;
+  border-top: 1px solid var(--border);
+  border-radius: 0;
+  padding: 12px 4px !important;
+}}
+[data-testid="stMetricValue"] {{
+  font-family: var(--mono) !important;
+  color: var(--cream) !important;
+  font-size: 1.6rem !important;
+  font-weight: 300 !important;
+  letter-spacing: -0.02em !important;
+}}
+[data-testid="stMetricLabel"] {{
+  font-family: var(--mono) !important;
+  color: var(--faded) !important;
+  font-size: 9px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.12em !important;
+}}
 
 /* ── Progress bar ── */
-.stProgress > div > div > div > div { background-color: #E35341 !important; }
-.stProgress > div > div > div { background-color: #2e2e2e !important; }
+.stProgress > div > div > div > div {{
+  background: var(--accent) !important;
+  border-radius: 0 !important;
+}}
+.stProgress > div > div > div {{
+  background-color: var(--border) !important;
+  border-radius: 0 !important;
+  height: 2px !important;
+}}
 
 /* ── Inputs ── */
-.stTextInput input, .stTextArea textarea {
-    background-color: #1e1e1e !important;
-    color: #F2E3CF !important;
-    border: 1px solid #3a3a3a !important;
-    border-radius: 6px !important;
-}
-.stTextInput input:focus, .stTextArea textarea:focus {
-    border-color: #E35341 !important;
-    box-shadow: 0 0 0 2px rgba(227,83,65,0.2) !important;
-}
+.stTextInput input, .stTextArea textarea {{
+  background-color: transparent !important;
+  color: var(--cream) !important;
+  border: none !important;
+  border-bottom: 1px solid var(--border) !important;
+  border-radius: 0 !important;
+  font-family: var(--sans) !important;
+  padding-left: 0 !important;
+}}
+.stTextInput input::placeholder, .stTextArea textarea::placeholder {{
+  color: var(--faded) !important;
+  font-style: italic;
+  font-family: var(--sans) !important;
+}}
+.stTextInput input:focus, .stTextArea textarea:focus {{
+  border-bottom-color: var(--accent) !important;
+  box-shadow: none !important;
+  outline: none !important;
+}}
 
-/* ── Selectbox / Dropdown ── */
-.stSelectbox > div > div, [data-baseweb="select"] > div {
-    background-color: #1e1e1e !important;
-    border-color: #3a3a3a !important;
-    color: #F2E3CF !important;
-}
+/* ── Selectbox ── */
+.stSelectbox > div > div, [data-baseweb="select"] > div {{
+  background-color: transparent !important;
+  border: none !important;
+  border-bottom: 1px solid var(--border) !important;
+  border-radius: 0 !important;
+  color: var(--cream) !important;
+  font-family: var(--sans) !important;
+}}
 
 /* ── Slider ── */
-.stSlider [data-baseweb="slider"] [data-testid="stThumb"] { background: #E35341 !important; }
-.stSlider [data-baseweb="slider"] [role="progressbar"] { background: #E35341 !important; }
+.stSlider [data-baseweb="slider"] [data-testid="stThumb"] {{
+  background: var(--cream) !important;
+  border: 1px solid var(--accent) !important;
+  border-radius: 0 !important;
+  width: 10px !important;
+  height: 10px !important;
+  box-shadow: none !important;
+}}
+.stSlider [data-baseweb="slider"] [role="progressbar"] {{
+  background: var(--accent) !important;
+  border-radius: 0 !important;
+}}
 
 /* ── Checkbox ── */
-.stCheckbox label span { color: #F2E3CF !important; }
+.stCheckbox label span {{ color: var(--cream) !important; }}
 
 /* ── Dividers ── */
-hr { border-color: #2e2e2e !important; }
+hr {{
+  border: none !important;
+  border-top: 1px solid var(--border) !important;
+  margin: 1.4rem 0 !important;
+}}
 
 /* ── Alert boxes ── */
-[data-baseweb="notification"] {
-    background-color: #1e1e1e !important;
-    border-color: #3a3a3a !important;
-    color: #F2E3CF !important;
-}
+[data-baseweb="notification"],
 [data-testid="stNotification"],
-div[role="alert"] {
-    background-color: #1e1e1e !important;
-    color: #F2E3CF !important;
-}
-/* Success → blue left border; Warning/Error → coral */
+div[role="alert"],
+.stAlert,
+.stAlert > div {{
+  background-color: transparent !important;
+  border: none !important;
+  border-left: 2px solid var(--border) !important;
+  border-radius: 0 !important;
+  color: var(--cream) !important;
+  font-family: var(--mono) !important;
+  font-size: 12px !important;
+  padding-left: 12px !important;
+}}
 div[data-testid="stNotification"][kind="success"],
-.stAlert [kind="success"] { border-left: 4px solid #0099FF !important; }
-div[data-testid="stNotification"][kind="info"]    { border-left: 4px solid #0099FF !important; }
-div[data-testid="stNotification"][kind="warning"] { border-left: 4px solid #E35341 !important; }
-div[data-testid="stNotification"][kind="error"]   { border-left: 4px solid #E35341 !important; }
-/* Catch-all for any remaining green/coloured alert backgrounds */
-.stAlert, .stAlert > div { background-color: #1e1e1e !important; color: #F2E3CF !important; }
+.stAlert [kind="success"] {{ border-left-color: #7A9E6A !important; }}
+div[data-testid="stNotification"][kind="info"]    {{ border-left-color: #6B8FAD !important; }}
+div[data-testid="stNotification"][kind="warning"] {{ border-left-color: var(--accent) !important; }}
+div[data-testid="stNotification"][kind="error"]   {{ border-left-color: #B04A3A !important; }}
 
 /* ── Number input ── */
-.stNumberInput input {
-    background-color: #1e1e1e !important;
-    color: #F2E3CF !important;
-    border: 1px solid #3a3a3a !important;
-}
+.stNumberInput input {{
+  background-color: transparent !important;
+  color: var(--cream) !important;
+  border: none !important;
+  border-bottom: 1px solid var(--border) !important;
+  border-radius: 0 !important;
+  font-family: var(--mono) !important;
+}}
 
 /* ── Audio player ── */
-audio { width: 100%; accent-color: #E35341; margin-top: 8px; }
+audio {{
+  width: 100%;
+  accent-color: var(--accent);
+  margin-top: 10px;
+  opacity: 0.85;
+  filter: sepia(0.2);
+}}
 
-/* ── Hamburger menu — hidden ── */
-#MainMenu { display: none !important; }
+/* ── Hide hamburger ── */
+#MainMenu {{ display: none !important; }}
 
 /* ── Scrollbar ── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #1a1a1a; }
-::-webkit-scrollbar-thumb { background: #3a3a3a; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #E35341; }
+::-webkit-scrollbar {{ width: 3px; height: 3px; }}
+::-webkit-scrollbar-track {{ background: transparent; }}
+::-webkit-scrollbar-thumb {{ background: var(--border); }}
+::-webkit-scrollbar-thumb:hover {{ background: var(--faded); }}
 
-/* ── Profile photo "+" badge ── */
-.profile-photo-wrap {
-    position: relative;
-    width: 80px;
-    margin: 0 auto;
-}
-.profile-photo-plus {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: #E35341;
-    border: 2px solid #171717;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 15px;
-    font-weight: 700;
-    color: white;
-    cursor: pointer;
-    line-height: 1;
-    user-select: none;
-    transition: background 0.15s ease;
-}
-.profile-photo-plus:hover { background: #c94432; }
-/* Push the hidden Streamlit trigger button off-screen */
-.element-container:has(.photo-btn-anchor) + .element-container {
-    position: fixed !important;
-    top: -9999px !important;
-    left: -9999px !important;
-    width: 0 !important;
-    height: 0 !important;
-    overflow: hidden !important;
-}
+/* ── Profile photo badge ── */
+.profile-photo-wrap {{
+  position: relative;
+  width: 80px;
+  margin: 0 auto;
+}}
+.profile-photo-plus {{
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 0;
+  background: var(--accent);
+  border: 1px solid #110f0c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 400;
+  font-family: var(--mono);
+  color: var(--cream);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s;
+}}
+.profile-photo-plus:hover {{ background: #9E4E2E; }}
+.element-container:has(.photo-btn-anchor) + .element-container {{
+  position: fixed !important;
+  top: -9999px !important;
+  left: -9999px !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}}
+
+/* ── Inline code ── */
+code {{
+  font-family: var(--mono) !important;
+  background: transparent !important;
+  color: var(--sand) !important;
+  border-radius: 0 !important;
+  font-size: 11px !important;
+  border-bottom: 1px solid var(--border) !important;
+  padding: 0 2px !important;
+}}
+
+/* ── Sidebar subheaders ── */
+section[data-testid="stSidebar"] h2,
+section[data-testid="stSidebar"] h3 {{
+  font-family: var(--mono) !important;
+  font-size: 9px !important;
+  font-style: normal !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.15em !important;
+  text-transform: uppercase !important;
+  color: var(--faded) !important;
+  border-left: none !important;
+  padding-left: 0 !important;
+  border-bottom: 1px solid var(--border) !important;
+  padding-bottom: 6px !important;
+  margin-bottom: 8px !important;
+}}
 </style>
-""", unsafe_allow_html=True)
+"""
+
+# ── Drop this into app.py in place of the existing st.markdown styles block ──
+st.markdown(STYLES, unsafe_allow_html=True)
 
 # ── Cached data ───────────────────────────────────────────────────────────────
 
