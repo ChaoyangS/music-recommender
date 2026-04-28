@@ -1145,6 +1145,34 @@ components.html("""
     var doc = window.parent.document;
     if (doc.getElementById('music-bg')) return;
 
+    // ── Shared audio context ──────────────────────────────────────────────────
+    var audioCtx = null;
+    function getAudioCtx() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        return audioCtx;
+    }
+    function playPop() {
+        if (!bgEnabled) return;
+        try {
+            var ctx = getAudioCtx();
+            var osc  = ctx.createOscillator();
+            var gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(700, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(180, ctx.currentTime + 0.18);
+            gain.gain.setValueAtTime(0.28, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
+            osc.start(ctx.currentTime);
+            osc.stop(ctx.currentTime + 0.18);
+        } catch(e) {}
+    }
+
+    // ── Persist on/off state ──────────────────────────────────────────────────
+    var bgEnabled = (window.parent.localStorage.getItem('musicBgEnabled') !== 'false');
+
+    // ── CSS ───────────────────────────────────────────────────────────────────
     var style = doc.createElement('style');
     style.id = 'music-bg-style';
     style.textContent = `
@@ -1155,6 +1183,7 @@ components.html("""
             overflow: hidden;
             pointer-events: none;
         }
+        #music-bg.hidden { display: none; }
         .music-note {
             position: absolute;
             opacity: 0;
@@ -1163,24 +1192,18 @@ components.html("""
             pointer-events: all;
             cursor: default;
         }
-        .music-note:hover {
-            animation-play-state: paused;
-        }
+        .music-note:hover { animation-play-state: paused; }
         @keyframes popBurst {
             0%   { transform: scale(1)   rotate(0deg);   opacity: 0.7; }
             35%  { transform: scale(2.2) rotate(-12deg); opacity: 0.9; }
             70%  { transform: scale(1.6) rotate(8deg);   opacity: 0.4; }
             100% { transform: scale(0)   rotate(15deg);  opacity: 0;   }
         }
-        .music-note.popped {
-            animation: popBurst 0.45s cubic-bezier(0.36,0.07,0.19,0.97) forwards !important;
-            pointer-events: none;
-        }
         @keyframes floatNote {
-            0%   { transform: translateY(105vh) rotate(-8deg);  opacity: 0;    }
+            0%   { transform: translateY(105vh) rotate(-8deg);  opacity: 0;   }
             8%   { opacity: 0.7; }
             85%  { opacity: 0.55; }
-            100% { transform: translateY(-10vh) rotate(15deg);  opacity: 0;    }
+            100% { transform: translateY(-10vh) rotate(15deg);  opacity: 0;   }
         }
         .music-bar {
             position: absolute;
@@ -1202,9 +1225,55 @@ components.html("""
             from { transform: scaleY(0.2); }
             to   { transform: scaleY(1.0); }
         }
+        #music-bg-btn {
+            position: fixed;
+            bottom: 22px;
+            right: 22px;
+            z-index: 9999;
+            width: 34px;
+            height: 34px;
+            background: transparent;
+            border: 1px solid #6B5C4A;
+            color: #BF5A34;
+            font-size: 17px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: border-color 0.15s, color 0.15s, opacity 0.15s;
+            border-radius: 0;
+            padding: 0;
+            line-height: 1;
+        }
+        #music-bg-btn:hover { border-color: #BF5A34; color: #EAE0CC; }
+        #music-bg-btn.off   { color: #3a3028; border-color: #2e2620; }
+        #music-bg-btn .slash {
+            position: absolute;
+            width: 1px;
+            height: 22px;
+            background: #6B5C4A;
+            transform: rotate(45deg);
+            display: none;
+        }
+        #music-bg-btn.off .slash { display: block; }
     `;
     doc.head.appendChild(style);
 
+    // ── Toggle button ─────────────────────────────────────────────────────────
+    var btn = doc.createElement('button');
+    btn.id = 'music-bg-btn';
+    btn.title = 'Toggle music background';
+    btn.innerHTML = '♪<span class="slash"></span>';
+    if (!bgEnabled) btn.classList.add('off');
+    btn.addEventListener('click', function() {
+        bgEnabled = !bgEnabled;
+        window.parent.localStorage.setItem('musicBgEnabled', bgEnabled);
+        bg.classList.toggle('hidden', !bgEnabled);
+        btn.classList.toggle('off', !bgEnabled);
+    });
+    doc.body.appendChild(btn);
+
+    // ── Icons ─────────────────────────────────────────────────────────────────
     var icons = {
         note1: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 46" width="34" height="46"><g stroke="#BF5A34" stroke-width="2.3" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M7 37 C4 34 4 29 8 28 C13 27 18 30 17 35 C16 39 11 40 7 37Z" fill="rgba(191,90,52,0.28)"/><path d="M17 33 L18 6"/><path d="M18 6 C25 9 27 18 20 23"/></g></svg>',
         note2: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 54 46" width="54" height="46"><g stroke="#BF5A34" stroke-width="2.3" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M6 38 C3 35 3 30 7 29 C12 28 17 31 16 36 C15 40 10 41 6 38Z" fill="rgba(191,90,52,0.28)"/><path d="M37 34 C34 31 34 26 38 25 C43 24 48 27 47 32 C46 36 41 37 37 34Z" fill="rgba(191,90,52,0.28)"/><path d="M16 34 L17 7"/><path d="M47 30 L48 7"/><path d="M17 7 L48 7"/></g></svg>',
@@ -1234,6 +1303,7 @@ components.html("""
 
     var bg = doc.createElement('div');
     bg.id = 'music-bg';
+    if (!bgEnabled) bg.classList.add('hidden');
 
     items.forEach(function(n) {
         var el = doc.createElement('div');
@@ -1242,6 +1312,7 @@ components.html("""
         el.style.cssText = 'left:' + n.left + ';width:' + n.w + 'px;height:' + n.h + 'px' +
             ';animation-duration:' + n.dur + ';animation-delay:' + n.delay;
         el.addEventListener('click', function(e) {
+            playPop();
             var burst = doc.createElement('div');
             burst.innerHTML = icons[n.key];
             burst.style.cssText = [
