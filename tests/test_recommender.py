@@ -215,7 +215,7 @@ class TestLoadSongs:
 
     def test_loads_correct_count(self):
         songs = load_songs(DATA_CSV)
-        assert len(songs) == 18
+        assert len(songs) == 150
 
     def test_energy_is_float(self):
         songs = load_songs(DATA_CSV)
